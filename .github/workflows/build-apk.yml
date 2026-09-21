@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DEFAULT_NOTES: |
-        ## QuantumIDE v1.2.2
+        ## X-Core IDE v1.2.2
 
         Performance optimizations and terminal fixes.
     steps:
@@ -84,8 +84,17 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Analyze Dart code
+        run: flutter analyze --no-fatal-infos
+        continue-on-error: true
+
       - name: Build release APK
         run: flutter build apk --release --target-platform android-arm64 --no-tree-shake-icons
+
+      - name: Verify APK
+        run: |
+          test -s build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -99,8 +108,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}
-          name: QuantumIDE ${{ github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}
+          name: X-Core IDE ${{ github.event.inputs.version != '' && github.event.inputs.version || github.ref_name }}
           body: ${{ github.event.inputs.release_notes != '' && github.event.inputs.release_notes || env.DEFAULT_NOTES }}
           files: build/app/outputs/flutter-apk/app-release.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+# Build trigger verification: this workflow intentionally runs on changes to itself.

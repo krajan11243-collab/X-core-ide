@@ -247,7 +247,7 @@ class _HomePageState extends ConsumerState<HomePage> {
               child: Container(
                 width: MediaQuery.of(context).size.width * .82,
                 height: double.infinity,
-                margin: const EdgeInsets.only(right: 44),
+                margin: EdgeInsets.zero,
                 padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
                 decoration: BoxDecoration(
                   color: dark ? const Color(0xFF070914) : theme.colorScheme.surface,

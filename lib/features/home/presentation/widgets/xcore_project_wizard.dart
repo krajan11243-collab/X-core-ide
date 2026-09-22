@@ -106,7 +106,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final accent = theme.colorScheme.primary;
+    final accent = xPink;
     return Material(
       color: Colors.transparent,
       child: Container(
@@ -123,7 +123,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               child: Row(children: [
                 Expanded(child: Text.rich(TextSpan(children: [
                   TextSpan(text: 'Create ', style: GoogleFonts.inter(fontSize: 30, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface)),
-                  TextSpan(text: 'Project', style: GoogleFonts.inter(fontSize: 30, fontWeight: FontWeight.w900, color: accent)),
+                  TextSpan(text: 'Project', style: GoogleFonts.inter(fontSize: 30, fontWeight: FontWeight.w900, color: xPink)),
                 ]))),
                 IconButton(onPressed: () => Navigator.pop(context), icon: const Icon(LucideIcons.x, size: 28)),
               ]),
@@ -226,20 +226,34 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                     child: ElevatedButton(
                       onPressed: busy ? null : save,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: accent,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
-                        elevation: 0,
+                        backgroundColor: Colors.transparent,
+                        foregroundColor: Colors.white,
+                        shadowColor: Colors.transparent,
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
                       ),
-                      child: busy
-                          ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                              const Icon(LucideIcons.sparkles, size: 20),
-                              const SizedBox(width: 10),
-                              Text(widget.project == null ? 'Create Project' : 'Save Changes', style: GoogleFonts.inter(fontSize: 16, fontWeight: FontWeight.w900)),
-                              const SizedBox(width: 8),
-                              const Icon(LucideIcons.arrow_right, size: 20),
-                            ]),
+                      child: Ink(
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(colors: [xPink, xPurple, xBlue]),
+                          borderRadius: BorderRadius.circular(19),
+                          boxShadow: [BoxShadow(color: xPink.withValues(alpha: .25), blurRadius: 24)],
+                        ),
+                        child: SizedBox(
+                          width: double.infinity,
+                          height: 58,
+                          child: Center(
+                            child: busy
+                                ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                                : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+                                    const Icon(LucideIcons.sparkles, size: 20),
+                                    const SizedBox(width: 10),
+                                    Text(widget.project == null ? 'Create Project' : 'Save Changes', style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w900)),
+                                    const SizedBox(width: 8),
+                                    const Icon(LucideIcons.arrow_right, size: 20),
+                                  ]),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ]),
@@ -276,14 +290,26 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _section(ThemeData theme, String title, String hint) => Row(
-    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    crossAxisAlignment: CrossAxisAlignment.center,
     children: [
-      Text(title, style: GoogleFonts.inter(fontSize: 14, fontWeight: FontWeight.w800)),
-      Row(children: [
-        Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFA855F7))),
-        const SizedBox(width: 6),
-        Text(hint, style: GoogleFonts.inter(fontSize: 10, color: theme.colorScheme.onSurfaceVariant)),
-      ]),
+      Icon(LucideIcons.layout_grid, color: xPurple, size: 19),
+      const SizedBox(width: 8),
+      Expanded(
+        child: Text(
+          title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(fontSize: 13.5, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
+        ),
+      ),
+      const SizedBox(width: 7),
+      Flexible(
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: xPurple)),
+          const SizedBox(width: 5),
+          Flexible(child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 9.5, color: theme.colorScheme.onSurfaceVariant))),
+        ]),
+      ),
     ],
   );
 
@@ -347,9 +373,9 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         }),
         label: Text(p.toUpperCase(), style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800)),
         avatar: Icon(p == 'android' ? Icons.android : LucideIcons.globe, size: 16),
-        selectedColor: theme.colorScheme.primary.withValues(alpha: .18),
-        checkmarkColor: theme.colorScheme.primary,
-        side: BorderSide(color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: .1)),
+        selectedColor: xPink.withValues(alpha: .16),
+        checkmarkColor: xPink,
+        side: BorderSide(color: selected ? xPink : theme.colorScheme.onSurface.withValues(alpha: .1)),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       );
     }).toList(),
@@ -366,11 +392,11 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: c ?? theme.colorScheme.onSurface.withValues(alpha: .05),
-          border: Border.all(color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: .1), width: selected ? 2.5 : 1),
+          border: Border.all(color: selected ? xPink : theme.colorScheme.onSurface.withValues(alpha: .1), width: selected ? 2.5 : 1),
           boxShadow: selected && c != null ? [BoxShadow(color: c.withValues(alpha: .3), blurRadius: 12)] : null,
         ),
         child: c == null
-            ? Icon(LucideIcons.ban, size: 18, color: selected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant)
+            ? Icon(LucideIcons.ban, size: 18, color: selected ? xPink : theme.colorScheme.onSurfaceVariant)
             : selected ? const Icon(LucideIcons.check, color: Colors.white, size: 18) : null,
       ),
     );

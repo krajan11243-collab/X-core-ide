@@ -280,35 +280,53 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
   Widget _section(IconData icon, String title, String hint) => Row(
     children: [
-      Icon(icon, color: purple, size: 20),
+      Container(
+        width: 31, height: 31,
+        decoration: BoxDecoration(
+          color: purple.withValues(alpha: .10),
+          borderRadius: BorderRadius.circular(9),
+          border: Border.all(color: purple.withValues(alpha: .28)),
+        ),
+        child: Icon(icon, color: purple, size: 18),
+      ),
       const SizedBox(width: 9),
-      Expanded(child: Text(title, maxLines: 1, overflow: TextOverflow.ellipsis,
-        style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5, fontWeight: FontWeight.w900))),
+      Expanded(
+        child: Text(title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: GoogleFonts.inter(color: Colors.white, fontSize: 12.8, fontWeight: FontWeight.w900)),
+      ),
       const SizedBox(width: 7),
-      Flexible(child: Row(mainAxisSize: MainAxisSize.min, children: [
-        Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
-        const SizedBox(width: 5),
-        Flexible(child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(color: muted, fontSize: 9.5))),
-      ])),
+      Flexible(
+        flex: 0,
+        child: Row(mainAxisSize: MainAxisSize.min, children: [
+          Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
+          const SizedBox(width: 5),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 155),
+            child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(color: muted, fontSize: 8.8, fontWeight: FontWeight.w500)),
+          ),
+        ]),
+      ),
     ],
   );
 
   Widget _typeGrid() => LayoutBuilder(builder: (context, constraints) {
-    final count = constraints.maxWidth >= 600 ? 4 : 2;
     const gap = 9.0;
+    final count = constraints.maxWidth >= 570 ? 4 : 2;
     final width = (constraints.maxWidth - gap * (count - 1)) / count;
     final items = <Map<String, dynamic>>[
       {'name':'FLUTTER','type':ProjectType.flutter,'icon':LucideIcons.layers,'color':cyan},
-      {'name':'PYTHON','type':ProjectType.python,'icon':LucideIcons.braces,'color':Color(0xFFFFC107)},
-      {'name':'NODEJS','type':ProjectType.nodejs,'icon':LucideIcons.box,'color':Color(0xFF45D483)},
-      {'name':'WEB','type':ProjectType.web,'icon':LucideIcons.globe,'color':Color(0xFF4F7CFF)},
-      {'name':'ANDROID JAVA','type':ProjectType.androidJava,'icon':Icons.android,'color':Color(0xFF00E676)},
-      {'name':'ANDROID KOTLIN','type':ProjectType.androidKotlin,'icon':Icons.code,'color':Color(0xFF8B5CF6)},
-      {'name':'RUST','type':ProjectType.rust,'icon':LucideIcons.settings_2,'color':Color(0xFFFF7043)},
+      {'name':'PYTHON','type':ProjectType.python,'icon':LucideIcons.braces,'color':const Color(0xFFFFC107)},
+      {'name':'NODEJS','type':ProjectType.nodejs,'icon':LucideIcons.box,'color':const Color(0xFF45D483)},
+      {'name':'WEB','type':ProjectType.web,'icon':LucideIcons.globe,'color':const Color(0xFF4F7CFF)},
+      {'name':'ANDROID JAVA','type':ProjectType.androidJava,'icon':Icons.android,'color':const Color(0xFF00E676)},
+      {'name':'ANDROID KOTLIN','type':ProjectType.androidKotlin,'icon':Icons.code_rounded,'color':const Color(0xFF8B5CF6)},
+      {'name':'RUST','type':ProjectType.rust,'icon':LucideIcons.sliders_horizontal,'color':const Color(0xFFFF7043)},
     ];
     return Wrap(
-      spacing: gap, runSpacing: 9,
+      spacing: gap, runSpacing: gap,
       children: items.map((item) {
         final selected = type == item['type'];
         final color = item['color'] as Color;
@@ -318,24 +336,50 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
             onTap: () => setState(() {
               type = item['type'] as ProjectType;
               if (type == ProjectType.flutter) sdkCtrl.text = '34';
-              if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) sdkCtrl.text = 'com.example.app';
+              if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) {
+                sdkCtrl.text = 'com.example.app';
+              }
             }),
-            borderRadius: BorderRadius.circular(15),
+            borderRadius: BorderRadius.circular(16),
             child: AnimatedContainer(
-              duration: const Duration(milliseconds: 140),
-              padding: const EdgeInsets.symmetric(horizontal: 10),
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 9),
               decoration: BoxDecoration(
-                color: selected ? color.withValues(alpha: .11) : panel,
-                borderRadius: BorderRadius.circular(15),
-                border: Border.all(color: selected ? color : Colors.white.withValues(alpha: .09), width: selected ? 1.6 : 1),
-                boxShadow: selected ? [BoxShadow(color: color.withValues(alpha: .13), blurRadius: 15)] : null,
+                color: selected ? color.withValues(alpha: .12) : panel,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: selected ? color : Colors.white.withValues(alpha: .095),
+                  width: selected ? 1.7 : 1,
+                ),
+                boxShadow: selected
+                    ? [BoxShadow(color: color.withValues(alpha: .18), blurRadius: 17, spreadRadius: -3)]
+                    : null,
               ),
               child: Row(children: [
-                Icon(item['icon'] as IconData, color: selected ? color : Colors.white70, size: 22),
-                const SizedBox(width: 8),
-                Expanded(child: Text(item['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis,
-                  style: GoogleFonts.inter(color: selected ? Colors.white : Colors.white70, fontSize: 10.5, fontWeight: FontWeight.w900))),
-                if (selected) Icon(LucideIcons.circle_check, color: color, size: 16),
+                Container(
+                  width: 29, height: 29,
+                  decoration: BoxDecoration(
+                    color: color.withValues(alpha: selected ? .12 : .055),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(item['icon'] as IconData,
+                    color: selected ? color : Colors.white70, size: 19),
+                ),
+                const SizedBox(width: 7),
+                Expanded(
+                  child: Text(item['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis,
+                    style: GoogleFonts.inter(
+                      color: selected ? Colors.white : Colors.white70,
+                      fontSize: 9.4, fontWeight: FontWeight.w900,
+                      letterSpacing: .1,
+                    )),
+                ),
+                if (selected)
+                  Container(
+                    width: 17, height: 17,
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: color, width: 1.4)),
+                    child: Icon(LucideIcons.check, color: color, size: 11),
+                  ),
               ]),
             ),
           ),
@@ -347,28 +391,55 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   Widget _platformGrid() => LayoutBuilder(builder: (context, constraints) {
     const gap = 9.0;
     final width = (constraints.maxWidth - gap * 2) / 3;
+    final data = <Map<String, dynamic>>[
+      {'name':'ANDROID','key':'android','icon':Icons.android},
+      {'name':'IOS','key':'ios','icon':Icons.phone_iphone},
+      {'name':'WEB','key':'web','icon':LucideIcons.globe},
+      {'name':'WINDOWS','key':'windows','icon':Icons.window},
+      {'name':'MACOS','key':'macos','icon':Icons.desktop_mac},
+      {'name':'LINUX','key':'linux','icon':Icons.terminal},
+    ];
     return Wrap(
       spacing: gap, runSpacing: gap,
-      children: ['android','ios','web','windows','macos','linux'].map((p) {
-        final selected = platforms.contains(p);
+      children: data.map((item) {
+        final key = item['key'] as String;
+        final selected = platforms.contains(key);
         return SizedBox(
-          width: width, height: 52,
+          width: width, height: 54,
           child: InkWell(
             onTap: () => setState(() {
-              if (!selected) platforms.add(p);
-              else if (platforms.length > 1) platforms.remove(p);
+              if (!selected) {
+                platforms.add(key);
+              } else if (platforms.length > 1) {
+                platforms.remove(key);
+              }
             }),
-            borderRadius: BorderRadius.circular(14),
-            child: Container(
+            borderRadius: BorderRadius.circular(15),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 140),
               decoration: BoxDecoration(
-                color: selected ? pink.withValues(alpha: .10) : panel,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: selected ? pink : Colors.white.withValues(alpha: .09), width: selected ? 1.6 : 1),
+                color: selected ? pink.withValues(alpha: .105) : panel,
+                borderRadius: BorderRadius.circular(15),
+                border: Border.all(
+                  color: selected ? pink : Colors.white.withValues(alpha: .095),
+                  width: selected ? 1.7 : 1,
+                ),
+                boxShadow: selected
+                    ? [BoxShadow(color: pink.withValues(alpha: .15), blurRadius: 16, spreadRadius: -4)]
+                    : null,
               ),
               child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                Icon(p == 'android' ? Icons.android : LucideIcons.globe, color: selected ? pink : Colors.white70, size: 19),
-                const SizedBox(width: 6),
-                Text(p.toUpperCase(), style: GoogleFonts.inter(color: Colors.white70, fontSize: 9.5, fontWeight: FontWeight.w900)),
+                Icon(item['icon'] as IconData,
+                  color: selected ? pink : Colors.white70, size: 20),
+                const SizedBox(width: 7),
+                Text(item['name'] as String,
+                  style: GoogleFonts.inter(
+                    color: selected ? Colors.white : Colors.white70,
+                    fontSize: 9.3, fontWeight: FontWeight.w900)),
+                if (selected) ...[
+                  const SizedBox(width: 5),
+                  Icon(LucideIcons.check, color: pink, size: 13),
+                ],
               ]),
             ),
           ),
@@ -408,7 +479,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   }
 
   Widget _iconRow() => SizedBox(
-    height: 58,
+    height: 62,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -429,16 +500,36 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               iconFontPackage = icon.fontPackage;
             }
           }),
-          borderRadius: BorderRadius.circular(15),
-          child: Container(
-            width: 58, height: 58,
+          borderRadius: BorderRadius.circular(16),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 140),
+            width: 62, height: 62,
             decoration: BoxDecoration(
-              color: selected ? pink.withValues(alpha: .07) : panel,
-              borderRadius: BorderRadius.circular(15),
-              border: Border.all(color: selected ? pink : Colors.white.withValues(alpha: .10), width: selected ? 2 : 1),
-              boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .15), blurRadius: 13)] : null,
+              color: selected ? pink.withValues(alpha: .075) : panel,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: selected ? pink : Colors.white.withValues(alpha: .10),
+                width: selected ? 2 : 1,
+              ),
+              boxShadow: selected
+                  ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 16, spreadRadius: -3)]
+                  : null,
             ),
-            child: Icon(icon, color: selected ? pink : Colors.white70, size: 24),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Icon(icon, color: selected ? pink : Colors.white70, size: 25),
+                if (selected)
+                  Positioned(
+                    right: 5, top: 5,
+                    child: Container(
+                      width: 15, height: 15,
+                      decoration: const BoxDecoration(shape: BoxShape.circle, color: pink),
+                      child: const Icon(LucideIcons.check, color: Colors.white, size: 10),
+                    ),
+                  ),
+              ],
+            ),
           ),
         );
       },

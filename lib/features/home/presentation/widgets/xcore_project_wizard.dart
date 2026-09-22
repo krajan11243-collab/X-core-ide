@@ -137,14 +137,14 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                 Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(20, 10, 20, bottom + 26),
+                padding: EdgeInsets.fromLTRB(18, 8, 18, bottom + 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     _projectName(),
-                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     _section(LucideIcons.layout_grid, 'PROJECT TYPE', 'Choose your technology'),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 8),
                     _typeGrid(),
                     if (type == ProjectType.flutter) ...[
                       const SizedBox(height: 20),
@@ -231,40 +231,56 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _projectName() => Container(
-    padding: const EdgeInsets.fromLTRB(16, 16, 18, 16),
+    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
     decoration: BoxDecoration(
       color: panel,
-      borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: cyan.withValues(alpha: .18)),
-      boxShadow: [BoxShadow(color: purple.withValues(alpha: .07), blurRadius: 18)],
+      borderRadius: BorderRadius.circular(18),
+      border: Border.all(color: cyan.withValues(alpha: .15)),
+      boxShadow: [BoxShadow(color: purple.withValues(alpha: .05), blurRadius: 18)],
     ),
     child: Row(children: [
       Container(
-        width: 58, height: 58,
+        width: 54, height: 54,
         decoration: BoxDecoration(
-          color: purple.withValues(alpha: .11),
+          color: purple.withValues(alpha: .10),
           borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: purple.withValues(alpha: .30)),
+          border: Border.all(color: purple.withValues(alpha: .28)),
         ),
-        child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 29),
+        child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 27),
       ),
-      const SizedBox(width: 15),
-      Expanded(child: TextField(
-        controller: nameCtrl,
-        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
-        decoration: InputDecoration(
-          labelText: 'Project Name',
-          labelStyle: GoogleFonts.inter(color: muted, fontSize: 12),
-          hintText: 'Project Name',
-          hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .55)),
-          border: InputBorder.none,
-          isDense: true,
-          contentPadding: const EdgeInsets.symmetric(vertical: 2),
+      const SizedBox(width: 10),
+      Expanded(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Project Name', style: GoogleFonts.inter(color: const Color(0xFFB4A9C9), fontSize: 11, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 4),
+            Container(
+              height: 34,
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              decoration: BoxDecoration(
+                color: field,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white.withValues(alpha: .08)),
+              ),
+              alignment: Alignment.centerLeft,
+              child: TextField(
+                controller: nameCtrl,
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                decoration: InputDecoration(
+                  hintText: 'Project Name',
+                  hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .58), fontSize: 13),
+                  border: InputBorder.none,
+                  isDense: true,
+                  contentPadding: EdgeInsets.zero,
+                ),
+              ),
+            ),
+          ],
         ),
-      )),
+      ),
     ]),
   );
-
   Widget _inputField(String label, String hint, IconData icon, {bool number = false}) => TextField(
     controller: sdkCtrl,
     keyboardType: number ? TextInputType.number : TextInputType.text,
@@ -320,9 +336,8 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _typeGrid() => LayoutBuilder(builder: (context, constraints) {
-    const gap = 10.0;
-    final count = constraints.maxWidth >= 560 ? 4 : 2;
-    final width = (constraints.maxWidth - gap * (count - 1)) / count;
+    const gap = 8.0;
+    final unit = (constraints.maxWidth - gap * 3) / 4;
 
     final items = <Map<String, dynamic>>[
       {'name':'FLUTTER','type':ProjectType.flutter,'logo':XCoreTechLogo.flutter,'color':cyan},
@@ -334,109 +349,122 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
       {'name':'RUST','type':ProjectType.rust,'logo':XCoreTechLogo.rust,'color':const Color(0xFFFF8A4C)},
     ];
 
-    return Wrap(
-      spacing: gap,
-      runSpacing: gap,
-      children: items.map((item) {
-        final selected = type == item['type'];
-        final color = item['color'] as Color;
-        final logo = item['logo'] as XCoreTechLogo;
+    Widget card(Map<String, dynamic> item, {required double width}) {
+      final selected = type == item['type'];
+      final color = item['color'] as Color;
+      final logo = item['logo'] as XCoreTechLogo;
 
-        return SizedBox(
-          width: width,
-          height: 72,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => setState(() {
-                type = item['type'] as ProjectType;
-                if (type == ProjectType.flutter) sdkCtrl.text = '34';
-                if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) {
-                  sdkCtrl.text = 'com.example.app';
-                }
-              }),
-              borderRadius: BorderRadius.circular(17),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 160),
-                padding: const EdgeInsets.symmetric(horizontal: 10),
-                decoration: BoxDecoration(
-                  color: selected ? color.withValues(alpha: .105) : panel,
-                  borderRadius: BorderRadius.circular(17),
-                  border: Border.all(
-                    color: selected ? color : Colors.white.withValues(alpha: .10),
-                    width: selected ? 1.8 : 1.0,
+      return SizedBox(
+        width: width,
+        height: 66,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => setState(() {
+              type = item['type'] as ProjectType;
+              if (type == ProjectType.flutter) sdkCtrl.text = '34';
+              if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) {
+                sdkCtrl.text = 'com.example.app';
+              }
+            }),
+            borderRadius: BorderRadius.circular(14),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              padding: const EdgeInsets.symmetric(horizontal: 7),
+              decoration: BoxDecoration(
+                color: selected ? color.withValues(alpha: .105) : panel,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(
+                  color: selected ? color : Colors.white.withValues(alpha: .105),
+                  width: selected ? 1.7 : 1.0,
+                ),
+                boxShadow: selected
+                    ? [BoxShadow(color: color.withValues(alpha: .22), blurRadius: 15, spreadRadius: -4)]
+                    : null,
+              ),
+              child: Row(
+                children: [
+                  Container(
+                    width: 34,
+                    height: 34,
+                    decoration: BoxDecoration(
+                      color: selected ? color.withValues(alpha: .12) : Colors.white.withValues(alpha: .025),
+                      borderRadius: BorderRadius.circular(9),
+                    ),
+                    alignment: Alignment.center,
+                    child: XCoreTechIcon(
+                      logo: logo,
+                      color: selected ? color : Colors.white70,
+                      size: 23,
+                    ),
                   ),
-                  boxShadow: selected
-                      ? [
-                          BoxShadow(
-                            color: color.withValues(alpha: .20),
-                            blurRadius: 18,
-                            spreadRadius: -3,
-                          ),
-                        ]
-                      : null,
-                ),
-                child: Row(
-                  children: [
+                  const SizedBox(width: 6),
+                  Expanded(
+                    child: Text(
+                      item['name'] as String,
+                      maxLines: 1,
+                      softWrap: false,
+                      overflow: TextOverflow.clip,
+                      style: GoogleFonts.inter(
+                        color: selected ? Colors.white : Colors.white70,
+                        fontSize: 8.5,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: .02,
+                      ),
+                    ),
+                  ),
+                  if (selected)
                     Container(
-                      width: 38,
-                      height: 38,
+                      width: 17,
+                      height: 17,
                       decoration: BoxDecoration(
-                        color: selected ? color.withValues(alpha: .11) : Colors.white.withValues(alpha: .025),
-                        borderRadius: BorderRadius.circular(10),
+                        shape: BoxShape.circle,
+                        border: Border.all(color: color, width: 1.2),
                       ),
-                      alignment: Alignment.center,
-                      child: XCoreTechIcon(
-                        logo: logo,
-                        color: selected ? color : Colors.white70,
-                        size: 25,
-                      ),
+                      child: Icon(LucideIcons.check, color: color, size: 10),
                     ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        item['name'] as String,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          color: selected ? Colors.white : Colors.white70,
-                          fontSize: 10.6,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: .05,
-                        ),
-                      ),
-                    ),
-                    if (selected)
-                      Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(color: color, width: 1.4),
-                        ),
-                        child: Icon(LucideIcons.check, color: color, size: 12),
-                      ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
-        );
-      }).toList(),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(
+          children: [
+            for (int i = 0; i < 4; i++) ...[
+              card(items[i], width: unit),
+              if (i < 3) const SizedBox(width: gap),
+            ],
+          ],
+        ),
+        const SizedBox(height: gap),
+        Row(
+          children: [
+            Expanded(child: card(items[4], width: double.infinity)),
+            const SizedBox(width: gap),
+            Expanded(child: card(items[5], width: double.infinity)),
+            const SizedBox(width: gap),
+            Expanded(flex: 1, child: card(items[6], width: double.infinity)),
+          ],
+        ),
+      ],
     );
   });
-
   Widget _platformGrid() => LayoutBuilder(builder: (context, constraints) {
-    const gap = 10.0;
+    const gap = 8.0;
     final width = (constraints.maxWidth - gap * 2) / 3;
 
     final data = <Map<String, dynamic>>[
-      {'name':'ANDROID','key':'android','icon':Icons.android},
-      {'name':'IOS','key':'ios','icon':Icons.phone_iphone},
-      {'name':'WEB','key':'web','icon':LucideIcons.globe},
-      {'name':'WINDOWS','key':'windows','icon':Icons.window},
-      {'name':'MACOS','key':'macos','icon':Icons.desktop_mac},
-      {'name':'LINUX','key':'linux','icon':Icons.terminal},
+      {'name':'ANDROID','key':'android','logo':XCorePlatformLogo.android},
+      {'name':'IOS','key':'ios','logo':XCorePlatformLogo.apple},
+      {'name':'WEB','key':'web','logo':XCorePlatformLogo.web},
+      {'name':'WINDOWS','key':'windows','logo':XCorePlatformLogo.windows},
+      {'name':'MACOS','key':'macos','logo':XCorePlatformLogo.apple},
+      {'name':'LINUX','key':'linux','logo':XCorePlatformLogo.linux},
     ];
 
     return Wrap(
@@ -448,7 +476,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
         return SizedBox(
           width: width,
-          height: 64,
+          height: 58,
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -459,35 +487,29 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                   platforms.remove(key);
                 }
               }),
-              borderRadius: BorderRadius.circular(15),
+              borderRadius: BorderRadius.circular(14),
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 150),
                 decoration: BoxDecoration(
-                  color: selected ? pink.withValues(alpha: .095) : panel,
-                  borderRadius: BorderRadius.circular(15),
+                  color: selected ? pink.withValues(alpha: .09) : panel,
+                  borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: selected ? pink : Colors.white.withValues(alpha: .10),
-                    width: selected ? 1.8 : 1,
+                    color: selected ? pink : Colors.white.withValues(alpha: .105),
+                    width: selected ? 1.7 : 1,
                   ),
                   boxShadow: selected
-                      ? [
-                          BoxShadow(
-                            color: pink.withValues(alpha: .17),
-                            blurRadius: 17,
-                            spreadRadius: -4,
-                          ),
-                        ]
+                      ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 15, spreadRadius: -4)]
                       : null,
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      item['icon'] as IconData,
+                    XCorePlatformIcon(
+                      logo: item['logo'] as XCorePlatformLogo,
                       color: selected ? pink : Colors.white70,
-                      size: 22,
+                      size: 21,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: 6),
                     Flexible(
                       child: Text(
                         item['name'] as String,
@@ -495,14 +517,14 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
                           color: selected ? Colors.white : Colors.white70,
-                          fontSize: 10.2,
+                          fontSize: 9.2,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
                     ),
                     if (selected) ...[
-                      const SizedBox(width: 5),
-                      Icon(LucideIcons.check, color: pink, size: 14),
+                      const SizedBox(width: 3),
+                      Icon(LucideIcons.check, color: pink, size: 12),
                     ],
                   ],
                 ),
@@ -513,7 +535,6 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
       }).toList(),
     );
   });
-
   Widget _colorRow() => SizedBox(
     height: 72,
     child: ListView.separated(
@@ -650,36 +671,40 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
 class _WizardBackdropPainter extends CustomPainter {
   const _WizardBackdropPainter();
+
   @override
   void paint(Canvas canvas, Size size) {
-    final center = Offset(size.width * .80, size.height * .10);
+    // Reference-style black/cosmic background: a restrained purple glow and
+    // partial orbital arc at the top-right. No large bottom planet/blob.
+    final center = Offset(size.width * .86, size.height * .055);
     final glow = Paint()
       ..shader = const RadialGradient(
-        colors: [Color(0x553B00FF), Color(0x001A0038)],
-      ).createShader(Rect.fromCircle(center: center, radius: size.width * .42));
-    canvas.drawCircle(center, size.width * .42, glow);
-    final horizon = size.height * .91;
-    final planet = Paint()
-      ..shader = const RadialGradient(
-        center: Alignment.topCenter,
-        radius: 1.0,
-        colors: [Color(0xAA3210FF), Color(0x003000FF)],
-      ).createShader(Rect.fromCircle(
-        center: Offset(size.width * .50, horizon),
-        radius: size.width * .72,
-      ));
-    canvas.drawCircle(Offset(size.width * .50, horizon), size.width * .72, planet);
-    final ring = Paint()
+        colors: [Color(0x552F0BFF), Color(0x0012002B)],
+      ).createShader(Rect.fromCircle(center: center, radius: size.width * .48));
+    canvas.drawCircle(center, size.width * .48, glow);
+
+    final orb = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 1.4
+      ..strokeWidth = 1.15
       ..shader = const LinearGradient(
-        colors: [Color(0x00FF00FF), Color(0xCCFF19E8), Color(0xFF00D9FF)],
-      ).createShader(Rect.fromLTWH(0, horizon - 65, size.width, 130));
+        colors: [Color(0x005E2CFF), Color(0xFF7B2CFF), Color(0x001A7BFF)],
+      ).createShader(Rect.fromCircle(
+        center: Offset(size.width * .91, size.height * .07),
+        radius: size.width * .36,
+      ));
     canvas.drawArc(
-      Rect.fromCenter(center: Offset(size.width * .50, horizon), width: size.width * 1.45, height: size.width * .55),
-      math.pi * 1.03, math.pi * .94, false, ring,
+      Rect.fromCenter(
+        center: Offset(size.width * .91, size.height * .07),
+        width: size.width * .72,
+        height: size.width * .72,
+      ),
+      math.pi * .52,
+      math.pi * .88,
+      false,
+      orb,
     );
   }
+
   @override
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

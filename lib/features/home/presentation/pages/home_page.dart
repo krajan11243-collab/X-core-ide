@@ -12,6 +12,7 @@ import 'package:quantum_ide/features/editor/presentation/notifiers/editor_notifi
 import 'package:quantum_ide/features/terminal/presentation/notifiers/terminal_tabs_notifier.dart';
 import 'package:quantum_ide/l10n/app_localizations.dart';
 import 'package:quantum_ide/core/services/system_stats_service.dart';
+import 'package:quantum_ide/features/home/presentation/widgets/xcore_project_wizard.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -64,134 +65,297 @@ class _HomePageState extends ConsumerState<HomePage> {
     }
   }
 
+
   Widget _buildMobileHome(BuildContext context, List<Project> projects, Project? lastProject, List<Project> otherProjects) {
     final theme = Theme.of(context);
-    return Scaffold(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      body: Stack(
-        children: [
-          // Background ambient glows - Wrapped in RepaintBoundary for performance
-          RepaintBoundary(
-            child: Stack(
-              children: [
-                Positioned(
-                  top: -150,
-                  left: -150,
-                  child: Container(
-                    width: 350,
-                    height: 350,
+    final dark = theme.brightness == Brightness.dark;
+    final text = theme.colorScheme.onSurface;
+    final muted = theme.colorScheme.onSurfaceVariant;
+    const purple = Color(0xFF9B00FF);
+    const cyan = Color(0xFF00D9FF);
+    const pink = Color(0xFFFF16D8);
+
+    Widget iconButton(IconData icon, Color accent, VoidCallback onTap) => Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: 54, height: 54,
+          decoration: BoxDecoration(
+            color: text.withValues(alpha: .025),
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: accent.withValues(alpha: .35)),
+            boxShadow: [BoxShadow(color: accent.withValues(alpha: .08), blurRadius: 18)],
+          ),
+          child: Icon(icon, color: text, size: 24),
+        ),
+      ),
+    );
+
+    Widget projectCard(Project project) {
+      final date = project.lastOpened.day.toString() + '.' + project.lastOpened.month.toString() + '.' + project.lastOpened.year.toString();
+      return Dismissible(
+        key: Key('xcore-' + project.id),
+        direction: DismissDirection.endToStart,
+        background: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          alignment: Alignment.centerRight,
+          padding: const EdgeInsets.only(right: 22),
+          decoration: BoxDecoration(color: Colors.redAccent.withValues(alpha: .12), borderRadius: BorderRadius.circular(18)),
+          child: const Icon(LucideIcons.trash_2, color: Colors.redAccent),
+        ),
+        confirmDismiss: (_) => _confirmDelete(context, ref, project),
+        child: Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: dark ? const Color(0xFF0C0F18) : theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: project.color.withValues(alpha: .24)),
+          ),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () async {
+                await ref.read(workspaceProvider.notifier).setWorkspace(project.path);
+                if (context.mounted) context.push('/editor');
+              },
+              onLongPress: () => _showProjectActions(context, ref, project),
+              borderRadius: BorderRadius.circular(18),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(15, 13, 14, 13),
+                child: Row(children: [
+                  Container(
+                    width: 54, height: 54,
                     decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          theme.colorScheme.primary.withValues(alpha: 0.12),
-                          theme.colorScheme.primary.withValues(alpha: 0.0),
-                        ],
-                      ),
+                      borderRadius: BorderRadius.circular(15),
+                      color: project.color.withValues(alpha: .08),
+                      border: Border.all(color: project.color.withValues(alpha: .5)),
                     ),
+                    child: project.appIconPath != null
+                      ? ClipRRect(borderRadius: BorderRadius.circular(15), child: Image.file(File(project.appIconPath!), fit: BoxFit.cover, errorBuilder: (_, __, ___) => Icon(project.icon, color: project.color, size: 27)))
+                      : Icon(project.icon, color: project.color, size: 27),
                   ),
-                ),
-                Positioned(
-                  top: 250,
-                  right: -100,
-                  child: Container(
-                    width: 300,
-                    height: 300,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      gradient: RadialGradient(
-                        colors: [
-                          Colors.purpleAccent.withValues(alpha: 0.08),
-                          Colors.purpleAccent.withValues(alpha: 0.0),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+                  const SizedBox(width: 14),
+                  Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(color: text, fontWeight: FontWeight.w800, fontSize: 16)),
+                    const SizedBox(height: 4),
+                    Text(project.type.name.toUpperCase() + '  •  ' + date, style: GoogleFonts.inter(color: muted, fontSize: 11.5)),
+                    if (project.platforms != null && project.platforms!.isNotEmpty) ...[
+                      const SizedBox(height: 6),
+                      Wrap(spacing: 5, children: project.platforms!.map((p) => Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                        decoration: BoxDecoration(color: project.color.withValues(alpha: .08), borderRadius: BorderRadius.circular(7), border: Border.all(color: project.color.withValues(alpha: .25))),
+                        child: Text(p.toUpperCase(), style: GoogleFonts.inter(color: project.color, fontSize: 8, fontWeight: FontWeight.w900)),
+                      )).toList()),
+                    ],
+                  ])),
+                  Icon(LucideIcons.chevron_right, color: muted, size: 22),
+                ]),
+              ),
             ),
           ),
-          SafeArea(
-            child: CustomScrollView(
-              physics: const BouncingScrollPhysics(),
-              slivers: [
-                _buildSliverAppBar(context),
-                SliverPadding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: SliverList(
-                    delegate: SliverChildListDelegate([
-                      const SizedBox(height: 10),
-                      _buildSearchField(),
-                      const SizedBox(height: 14),
-                      if (lastProject != null && _searchQuery.isEmpty) ...[
-                        _buildResumeCard(context, lastProject),
-                      ],
-                      _buildQuickActionsRow(context),
-                      const SizedBox(height: 14),
-                      _buildSystemMonitor(context),
-                      const SizedBox(height: 20),
-                      if (otherProjects.isNotEmpty) ...[
-                        _buildProjectsHeader(otherProjects.length),
-                        const SizedBox(height: 10),
-                      ],
+        ),
+      );
+    }
+
+    Widget resumeCard(Project project) {
+      final date = project.lastOpened.day.toString() + '.' + project.lastOpened.month.toString() + '.' + project.lastOpened.year.toString();
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () async {
+            await ref.read(workspaceProvider.notifier).setWorkspace(project.path);
+            if (context.mounted) context.push('/editor');
+          },
+          borderRadius: BorderRadius.circular(22),
+          child: Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(22),
+              gradient: const LinearGradient(colors: [purple, cyan]),
+              boxShadow: [BoxShadow(color: purple.withValues(alpha: .25), blurRadius: 24)],
+            ),
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 185),
+              padding: const EdgeInsets.fromLTRB(18, 16, 18, 15),
+              decoration: BoxDecoration(color: dark ? const Color(0xFF0A0D16) : theme.colorScheme.surface, borderRadius: BorderRadius.circular(20)),
+              child: Stack(children: [
+                Positioned(right: -50, top: -65, child: Container(width: 190, height: 190, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [purple.withValues(alpha: .20), Colors.transparent])))),
+                Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 13, vertical: 7),
+                    decoration: BoxDecoration(color: pink.withValues(alpha: .12), borderRadius: BorderRadius.circular(11), border: Border.all(color: pink.withValues(alpha: .32))),
+                    child: Text('RESUME PROJECT', style: GoogleFonts.inter(color: pink, fontSize: 10, fontWeight: FontWeight.w900, letterSpacing: 1.1)),
+                  ),
+                  const Spacer(),
+                  Row(children: [
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 25, fontWeight: FontWeight.w900, color: text)),
+                      const SizedBox(height: 8),
+                      Text(project.type.name.toUpperCase() + '  •  Last active: ' + date, style: GoogleFonts.inter(fontSize: 12, color: muted)),
+                    ])),
+                    Container(
+                      width: 62, height: 62,
+                      decoration: BoxDecoration(shape: BoxShape.circle, color: pink.withValues(alpha: .08), border: Border.all(color: pink, width: 1.6), boxShadow: [BoxShadow(color: pink.withValues(alpha: .34), blurRadius: 20)]),
+                      child: const Icon(LucideIcons.play, color: Colors.white, size: 28),
+                    ),
+                  ]),
+                ]),
+              ]),
+            ),
+          ),
+        ),
+      );
+    }
+
+    Widget menuItem(IconData icon, String label, Color accent, VoidCallback onTap) => Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 62,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            decoration: BoxDecoration(color: text.withValues(alpha: .025), borderRadius: BorderRadius.circular(16), border: Border.all(color: accent.withValues(alpha: .28))),
+            child: Row(children: [
+              Container(width: 40, height: 40, decoration: BoxDecoration(color: accent.withValues(alpha: .08), borderRadius: BorderRadius.circular(12), border: Border.all(color: accent.withValues(alpha: .25))), child: Icon(icon, color: accent, size: 22)),
+              const SizedBox(width: 14),
+              Expanded(child: Text(label, style: GoogleFonts.inter(color: text, fontWeight: FontWeight.w700, fontSize: 14))),
+              Icon(LucideIcons.chevron_right, color: muted, size: 21),
+            ]),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> openMenu() async {
+      final stats = ref.read(systemStatsProvider);
+      await showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: 'X-core menu',
+        barrierColor: Colors.black.withValues(alpha: .58),
+        transitionDuration: const Duration(milliseconds: 220),
+        pageBuilder: (ctx, a1, a2) => SafeArea(
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Material(
+              color: Colors.transparent,
+              child: Container(
+                width: MediaQuery.of(context).size.width * .82,
+                height: double.infinity,
+                margin: const EdgeInsets.only(right: 44),
+                padding: const EdgeInsets.fromLTRB(20, 18, 20, 22),
+                decoration: BoxDecoration(
+                  color: dark ? const Color(0xFF070914) : theme.colorScheme.surface,
+                  borderRadius: const BorderRadius.only(topRight: Radius.circular(28), bottomRight: Radius.circular(28)),
+                  border: Border.all(color: purple.withValues(alpha: .42)),
+                ),
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Row(children: [
+                    Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      ShaderMask(shaderCallback: (r) => const LinearGradient(colors: [purple, Colors.white, cyan]).createShader(r), child: Text('X-core IDE', style: GoogleFonts.inter(fontSize: 28, fontWeight: FontWeight.w900, color: Colors.white))),
+                      Text('CODE  •  BUILD  •  DEPLOY', style: GoogleFonts.inter(fontSize: 8.5, letterSpacing: 2, color: muted)),
+                    ])),
+                    IconButton(onPressed: () => Navigator.pop(ctx), icon: const Icon(LucideIcons.x, size: 28)),
+                  ]),
+                  const SizedBox(height: 18),
+                  Container(
+                    padding: const EdgeInsets.all(14),
+                    decoration: BoxDecoration(borderRadius: BorderRadius.circular(18), border: Border.all(color: cyan.withValues(alpha: .22))),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
+                        Text('SYSTEM TELEMETRY', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w800, color: muted)),
+                        Text('ACTIVE', style: GoogleFonts.inter(fontSize: 10, fontWeight: FontWeight.w900, color: cyan)),
+                      ]),
+                      const SizedBox(height: 12),
+                      Text('CPU  ' + (stats.cpuUsage * 100).toStringAsFixed(0) + '%', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(value: stats.cpuUsage.clamp(0, 1), minHeight: 5, borderRadius: BorderRadius.circular(5), valueColor: const AlwaysStoppedAnimation(cyan)),
+                      const SizedBox(height: 12),
+                      Text('RAM  ' + stats.ramUsedGB.toStringAsFixed(1) + ' GB', style: GoogleFonts.inter(fontSize: 15, fontWeight: FontWeight.w700)),
+                      const SizedBox(height: 6),
+                      LinearProgressIndicator(value: stats.ramUsage.clamp(0, 1), minHeight: 5, borderRadius: BorderRadius.circular(5), valueColor: const AlwaysStoppedAnimation(pink)),
                     ]),
                   ),
-                ),
-                if (projects.isEmpty)
-                  SliverFillRemaining(
-                    hasScrollBody: false,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(LucideIcons.folder_search, size: 64, color: theme.colorScheme.onSurface.withValues(alpha: 0.1)),
-                          const SizedBox(height: 16),
-                          Text(
-                            _searchQuery.isEmpty ? AppLocalizations.of(context)!.noProjects : AppLocalizations.of(context)!.nothingFound,
-                            style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5), fontSize: 16),
-                          ),
-                          if (_searchQuery.isEmpty) ...[
-                            const SizedBox(height: 24),
-                            ElevatedButton.icon(
-                              onPressed: () => _showProjectDialog(context, ref),
-                              icon: const Icon(LucideIcons.plus, size: 18),
-                              label: Text(AppLocalizations.of(context)!.createFirstProject),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary,
-                                foregroundColor: theme.colorScheme.onPrimary,
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                              ),
-                            ),
-                          ],
-                        ],
-                      ),
-                    ),
-                  )
-                else if (otherProjects.isNotEmpty)
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-                    sliver: SliverList(
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _buildProjectCard(context, ref, otherProjects[index]),
-                        childCount: otherProjects.length,
-                      ),
-                    ),
-                  ),
-              ],
+                  const SizedBox(height: 16),
+                  Expanded(child: ListView(physics: const BouncingScrollPhysics(), children: [
+                    menuItem(LucideIcons.folder_open, 'Open Project', const Color(0xFF00E676), () async {
+                      Navigator.pop(ctx);
+                      final dir = await FilePicker.getDirectoryPath();
+                      if (dir != null) await ref.read(projectServiceProvider.notifier).importProject(dir);
+                    }),
+                    menuItem(LucideIcons.layout_grid, 'Market', cyan, () { Navigator.pop(ctx); context.push('/packages'); }),
+                    menuItem(LucideIcons.server, 'Servers', pink, () { Navigator.pop(ctx); context.push('/servers'); }),
+                    menuItem(LucideIcons.settings, 'Settings', const Color(0xFFA855F7), () { Navigator.pop(ctx); context.push('/settings'); }),
+                    menuItem(LucideIcons.github, 'GitHub', text, () { Navigator.pop(ctx); context.push('/github'); }),
+                  ])),
+                  Divider(color: text.withValues(alpha: .12)),
+                  const SizedBox(height: 10),
+                  Row(children: [
+                    Container(width: 42, height: 42, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: cyan.withValues(alpha: .45))), child: const Icon(LucideIcons.code_2, color: cyan)),
+                    const SizedBox(width: 12),
+                    Text('X-core IDE', style: GoogleFonts.inter(fontWeight: FontWeight.w800, color: text)),
+                    const Spacer(),
+                    Text('v1.0.0', style: GoogleFonts.inter(fontSize: 11, color: muted)),
+                  ]),
+                ]),
+              ),
             ),
           ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showProjectDialog(context, ref),
-        backgroundColor: theme.colorScheme.primary,
-        foregroundColor: theme.colorScheme.onPrimary,
-        child: const Icon(LucideIcons.plus),
+        ),
+      );
+    }
+
+    return Scaffold(
+      backgroundColor: dark ? const Color(0xFF02030A) : theme.scaffoldBackgroundColor,
+      body: Stack(children: [
+        Positioned.fill(child: IgnorePointer(child: DecoratedBox(decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter, end: Alignment.bottomCenter,
+            colors: dark ? const [Color(0xFF03030A), Color(0xFF070016), Color(0xFF02030A)] : [theme.scaffoldBackgroundColor, theme.colorScheme.surfaceContainerLowest, theme.scaffoldBackgroundColor],
+          ),
+        )))),
+        Positioned(left: -120, top: 170, child: Container(width: 300, height: 300, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [purple.withValues(alpha: .18), Colors.transparent])))),
+        Positioned(right: -130, bottom: 50, child: Container(width: 340, height: 340, decoration: BoxDecoration(shape: BoxShape.circle, gradient: RadialGradient(colors: [cyan.withValues(alpha: .16), Colors.transparent])))),
+        SafeArea(child: CustomScrollView(physics: const BouncingScrollPhysics(), slivers: [
+          SliverToBoxAdapter(child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 0),
+            child: Row(children: [
+              iconButton(LucideIcons.menu, purple, openMenu),
+              const Spacer(),
+              Column(children: [
+                ShaderMask(shaderCallback: (r) => const LinearGradient(colors: [Color(0xFF7B00FF), Colors.white, cyan]).createShader(r), child: Text('X-core IDE', style: GoogleFonts.inter(fontSize: 25, fontWeight: FontWeight.w900, color: Colors.white, letterSpacing: -1.2))),
+                Text('CODE  •  BUILD  •  DEPLOY', style: GoogleFonts.inter(fontSize: 8.5, fontWeight: FontWeight.w600, letterSpacing: 2.1, color: muted)),
+              ]),
+              const Spacer(),
+              Row(children: [iconButton(LucideIcons.terminal, cyan, () => context.push('/terminal')), const SizedBox(width: 8), iconButton(LucideIcons.settings, cyan, () => context.push('/settings'))]),
+            ]),
+          )),
+          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 22, 20, 0), child: lastProject == null ? Container(height: 120, decoration: BoxDecoration(borderRadius: BorderRadius.circular(22), border: Border.all(color: purple.withValues(alpha: .3))), child: Center(child: Text('Create your first X-core project', style: GoogleFonts.inter(color: muted, fontWeight: FontWeight.w600)))) : resumeCard(lastProject))),
+          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 24, 20, 10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Projects (' + projects.length.toString() + ')', style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800, color: text)), Icon(LucideIcons.list_filter, size: 18, color: muted)]))),
+          if (projects.isEmpty)
+            SliverFillRemaining(hasScrollBody: false, child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 100), child: ElevatedButton.icon(onPressed: onCreateProject, icon: const Icon(LucideIcons.plus), label: const Text('Create Project'), style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, foregroundColor: theme.colorScheme.onPrimary, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)))))))
+          else
+            SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 110), sliver: SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => projectCard(projects[i]), childCount: projects.length))),
+        ])),
+      ]),
+      floatingActionButton: Padding(
+        padding: const EdgeInsets.only(right: 2, bottom: 3),
+        child: FloatingActionButton(
+          onPressed: onCreateProject,
+          elevation: 12,
+          backgroundColor: purple,
+          foregroundColor: Colors.white,
+          shape: const CircleBorder(),
+          child: const Icon(LucideIcons.plus, size: 34),
+        ),
       ),
     );
   }
-
   Widget _buildDesktopHome(BuildContext context, List<Project> projects, Project? lastProject, List<Project> otherProjects) {
     final theme = Theme.of(context);
     final stats = ref.watch(systemStatsProvider);
@@ -1406,471 +1570,20 @@ class _HomePageState extends ConsumerState<HomePage> {
   }
 
 
+
   void _showProjectDialog(BuildContext context, WidgetRef ref, {Project? project}) async {
-    final isEdit = project != null;
-    final nameCtrl = TextEditingController(text: project?.name);
-    ProjectType selectedType = project?.type ?? ProjectType.flutter;
     final theme = Theme.of(context);
-
-    // Flutter-specific configurations
-    final sdkCtrl = TextEditingController(text: (project?.type == ProjectType.androidJava || project?.type == ProjectType.androidKotlin) ? (project?.sdkVersion ?? 'com.example.app') : '34');
-    final List<String> availablePlatforms = ['android', 'ios', 'web', 'windows', 'macos', 'linux'];
-    final List<String> selectedPlatforms = ['android'];
-
-    int? selectedColorValue = project?.colorValue;
-    int? selectedIconCodePoint = project?.iconCodePoint;
-    String? selectedIconFontFamily = project?.iconFontFamily;
-    String? selectedIconFontPackage = project?.iconFontPackage;
-
-    final List<IconData> selectableIcons = [
-      LucideIcons.folder,
-      LucideIcons.folder_open,
-      LucideIcons.folder_search,
-      LucideIcons.folder_heart,
-      LucideIcons.folder_git,
-      LucideIcons.folder_code,
-      LucideIcons.smartphone,
-      LucideIcons.code,
-      LucideIcons.terminal,
-      LucideIcons.globe,
-      LucideIcons.server,
-      LucideIcons.database,
-      LucideIcons.cpu,
-      LucideIcons.palette,
-      LucideIcons.layers,
-      LucideIcons.puzzle,
-      LucideIcons.gamepad_2,
-      LucideIcons.cloud,
-      LucideIcons.flame,
-      LucideIcons.heart,
-      LucideIcons.star,
-    ];
-
-    final List<Color> selectableColors = [
-      const Color(0xFFE57373),
-      const Color(0xFFF06292),
-      const Color(0xFFBA68C8),
-      const Color(0xFF9575CD),
-      const Color(0xFF7986CB),
-      const Color(0xFF64B5F6),
-      const Color(0xFF4FC3F7),
-      const Color(0xFF4DD0E1),
-      const Color(0xFF4DB6AC),
-      const Color(0xFF81C784),
-      const Color(0xFFAED581),
-      const Color(0xFFD4E157),
-      const Color(0xFFFFD54F),
-    ];
     final isDesktop = MediaQuery.of(context).size.width > 800;
-
-    bool isCreating = false;
-    String? creationError;
-
+    final content = XCoreProjectWizard(project: project);
     if (isDesktop) {
       await showDialog(
         context: context,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setState) => Dialog(
-            backgroundColor: Colors.transparent,
-            child: Container(
-              width: 760,
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surfaceContainerHigh,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.3),
-                    blurRadius: 32,
-                    spreadRadius: 4,
-                  )
-                ],
-              ),
-              padding: const EdgeInsets.all(28),
-              child: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text(
-                          isEdit ? AppLocalizations.of(context)!.projectSettings : AppLocalizations.of(context)!.createProject,
-                          style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
-                        ),
-                        IconButton(
-                          icon: const Icon(LucideIcons.x),
-                          onPressed: () => Navigator.pop(ctx),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Left column
-                        Expanded(
-                          flex: 5,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TextField(
-                                controller: nameCtrl,
-                                autofocus: !isEdit,
-                                style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 15),
-                                decoration: InputDecoration(
-                                  hintText: AppLocalizations.of(context)!.projectName,
-                                  hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                  filled: true,
-                                  fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                                ),
-                              ),
-                              if (!isEdit) ...[
-                                const SizedBox(height: 24),
-                                Text(AppLocalizations.of(context)!.projectType, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                                const SizedBox(height: 12),
-                                Wrap(
-                                  spacing: 8,
-                                  runSpacing: 8,
-                                  children: ProjectType.values.where((type) => type != ProjectType.dart && type != ProjectType.shell && type != ProjectType.other).map((type) {
-                                    final isSelected = selectedType == type;
-                                    return GestureDetector(
-                                      onTap: () => setState(() {
-                                        final oldType = selectedType;
-                                        selectedType = type;
-                                        if ((type == ProjectType.androidJava || type == ProjectType.androidKotlin) && 
-                                            (oldType == ProjectType.flutter || sdkCtrl.text == '34')) {
-                                          sdkCtrl.text = 'com.example.${nameCtrl.text.isEmpty ? 'app' : nameCtrl.text.toLowerCase().replaceAll('-', '_')}';
-                                        } else if (type == ProjectType.flutter && 
-                                                   (oldType == ProjectType.androidJava || oldType == ProjectType.androidKotlin || sdkCtrl.text.contains('.'))) {
-                                          sdkCtrl.text = '34';
-                                        }
-                                      }),
-                                      child: Container(
-                                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                        decoration: BoxDecoration(
-                                          color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.15) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                                          borderRadius: BorderRadius.circular(10),
-                                          border: Border.all(color: isSelected ? theme.colorScheme.primary : Colors.transparent),
-                                        ),
-                                        child: Text(
-                                          type.name.toUpperCase(),
-                                          style: GoogleFonts.inter(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold),
-                                        ),
-                                      ),
-                                    );
-                                  }).toList(),
-                                ),
-                                if (selectedType == ProjectType.flutter) ...[
-                                  const SizedBox(height: 24),
-                                  Text(AppLocalizations.of(context)!.androidCompileSdkVersion, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                                  const SizedBox(height: 12),
-                                  TextField(
-                                    controller: sdkCtrl,
-                                    keyboardType: TextInputType.number,
-                                    style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 14),
-                                    decoration: InputDecoration(
-                                      hintText: AppLocalizations.of(context)!.defaultSdkVersion,
-                                      hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                      filled: true,
-                                      fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-                                  Text(AppLocalizations.of(context)!.targetPlatforms, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                                  const SizedBox(height: 12),
-                                  Wrap(
-                                    spacing: 8,
-                                    runSpacing: 8,
-                                    children: availablePlatforms.map((platform) {
-                                      final isPlatSelected = selectedPlatforms.contains(platform);
-                                      return GestureDetector(
-                                        onTap: () {
-                                          setState(() {
-                                            if (isPlatSelected) {
-                                              if (selectedPlatforms.length > 1) {
-                                                selectedPlatforms.remove(platform);
-                                              }
-                                            } else {
-                                              selectedPlatforms.add(platform);
-                                            }
-                                          });
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                          decoration: BoxDecoration(
-                                            color: isPlatSelected ? theme.colorScheme.primary.withValues(alpha: 0.15) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                                            borderRadius: BorderRadius.circular(10),
-                                            border: Border.all(color: isPlatSelected ? theme.colorScheme.primary : Colors.transparent),
-                                          ),
-                                          child: Row(
-                                            mainAxisSize: MainAxisSize.min,
-                                            children: [
-                                              Icon(
-                                                isPlatSelected ? LucideIcons.circle_check : LucideIcons.circle,
-                                                size: 14,
-                                                color: isPlatSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                                              ),
-                                              const SizedBox(width: 6),
-                                              Text(
-                                                platform.toUpperCase(),
-                                                style: GoogleFonts.inter(color: isPlatSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      );
-                                    }).toList(),
-                                  ),
-                                ],
-                                if (selectedType == ProjectType.androidJava || selectedType == ProjectType.androidKotlin) ...[
-                                  const SizedBox(height: 24),
-                                  Text("PACKAGE NAME (APPLICATION ID)", style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                                  const SizedBox(height: 12),
-                                  TextField(
-                                    controller: sdkCtrl,
-                                    keyboardType: TextInputType.text,
-                                    style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 14),
-                                    decoration: InputDecoration(
-                                      hintText: "e.g. com.example.myapp",
-                                      hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                                      filled: true,
-                                      fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide.none),
-                                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    ),
-                                  ),
-                                ],
-                              ],
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 32),
-                        // Right column
-                        Expanded(
-                          flex: 4,
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(AppLocalizations.of(context)!.accentColor, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => setState(() => selectedColorValue = null),
-                                    child: Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: BoxDecoration(
-                                        shape: BoxShape.circle,
-                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-                                        border: Border.all(
-                                          color: selectedColorValue == null ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                          width: selectedColorValue == null ? 2 : 1,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Icon(
-                                          LucideIcons.ban,
-                                          size: 14,
-                                          color: selectedColorValue == null ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  ...selectableColors.map((color) {
-                                    final isSelected = selectedColorValue == color.toARGB32();
-                                    return GestureDetector(
-                                      onTap: () => setState(() => selectedColorValue = color.toARGB32()),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 150),
-                                        width: 38,
-                                        height: 38,
-                                        decoration: BoxDecoration(
-                                          shape: BoxShape.circle,
-                                          color: color,
-                                          border: Border.all(
-                                            color: isSelected ? Colors.white : Colors.transparent,
-                                            width: isSelected ? 2 : 0,
-                                          ),
-                                        ),
-                                        child: isSelected ? const Center(
-                                          child: Icon(LucideIcons.check, color: Colors.white, size: 14),
-                                        ) : null,
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                              const SizedBox(height: 24),
-                              Text(AppLocalizations.of(context)!.projectIcon, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                              const SizedBox(height: 12),
-                              Wrap(
-                                spacing: 8,
-                                runSpacing: 8,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => setState(() {
-                                      selectedIconCodePoint = null;
-                                      selectedIconFontFamily = null;
-                                      selectedIconFontPackage = null;
-                                    }),
-                                    child: Container(
-                                      width: 38,
-                                      height: 38,
-                                      decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
-                                        color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-                                        border: Border.all(
-                                          color: selectedIconCodePoint == null ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                          width: selectedIconCodePoint == null ? 2 : 1,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Icon(
-                                          LucideIcons.ban,
-                                          size: 14,
-                                          color: selectedIconCodePoint == null ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  ...selectableIcons.map((icon) {
-                                    final isSelected = selectedIconCodePoint == icon.codePoint;
-                                    return GestureDetector(
-                                      onTap: () => setState(() {
-                                        selectedIconCodePoint = icon.codePoint;
-                                        selectedIconFontFamily = icon.fontFamily;
-                                        selectedIconFontPackage = icon.fontPackage;
-                                      }),
-                                      child: AnimatedContainer(
-                                        duration: const Duration(milliseconds: 150),
-                                        width: 38,
-                                        height: 38,
-                                        decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(8),
-                                          color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                                          border: Border.all(
-                                            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                            width: isSelected ? 2 : 1,
-                                          ),
-                                        ),
-                                        child: Center(
-                                          child: Icon(
-                                            icon,
-                                            size: 16,
-                                            color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                          ),
-                                        ),
-                                      ),
-                                    );
-                                  }),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                     ),
-                     if (creationError != null) ...[
-                       const SizedBox(height: 12),
-                       Container(
-                         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                         decoration: BoxDecoration(
-                           color: Colors.redAccent.withValues(alpha: 0.1),
-                           borderRadius: BorderRadius.circular(10),
-                           border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
-                         ),
-                           child: Row(
-                             children: [
-                               Icon(Icons.error_outline, size: 16, color: Colors.redAccent),
-                             const SizedBox(width: 8),
-                             Expanded(
-                               child: Text(
-                                 creationError!,
-                                 style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 11),
-                               ),
-                             ),
-                           ],
-                         ),
-                       ),
-                     ],
-                     const SizedBox(height: 32),
-                     Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        TextButton(
-                          onPressed: () => Navigator.pop(ctx),
-                          child: Text(AppLocalizations.of(context)!.cancel),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton(
-                          onPressed: isCreating ? null : () async {
-                            if (nameCtrl.text.isEmpty) return;
-                            setState(() {
-                              isCreating = true;
-                              creationError = null;
-                            });
-                            try {
-                              if (isEdit) {
-                                await ref.read(projectServiceProvider.notifier).saveProject(Project(
-                                  id: project.id,
-                                  name: nameCtrl.text,
-                                  path: project.path,
-                                  type: project.type,
-                                  lastOpened: project.lastOpened,
-                                  isInternal: project.isInternal,
-                                  colorValue: selectedColorValue,
-                                  iconCodePoint: selectedIconCodePoint,
-                                  iconFontFamily: selectedIconFontFamily,
-                                  iconFontPackage: selectedIconFontPackage,
-                                  platforms: project.platforms,
-                                  sdkVersion: project.sdkVersion,
-                                ));
-                              } else {
-                                await ref.read(projectServiceProvider.notifier).createProject(
-                                  name: nameCtrl.text,
-                                  path: '',
-                                  type: selectedType,
-                                  iconCodePoint: selectedIconCodePoint,
-                                  colorValue: selectedColorValue,
-                                  iconFontFamily: selectedIconFontFamily,
-                                  iconFontPackage: selectedIconFontPackage,
-                                  platforms: selectedType == ProjectType.flutter ? selectedPlatforms : null,
-                                  sdkVersion: (selectedType == ProjectType.flutter || selectedType == ProjectType.androidJava || selectedType == ProjectType.androidKotlin) ? sdkCtrl.text.trim() : null,
-                                );
-                              }
-                              if (ctx.mounted) Navigator.pop(ctx);
-                            } catch (e) {
-                              setState(() {
-                                isCreating = false;
-                                creationError = e.toString();
-                              });
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: theme.colorScheme.primary,
-                            foregroundColor: theme.colorScheme.onPrimary,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                          ),
-                          child: isCreating
-                              ? const SizedBox(width: 16, height: 16, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                              : Text(isEdit ? AppLocalizations.of(context)!.saveAction : AppLocalizations.of(context)!.createProject, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        builder: (ctx) => Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(24),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 760, maxHeight: 900),
+            child: content,
           ),
         ),
       );
@@ -1879,389 +1592,9 @@ class _HomePageState extends ConsumerState<HomePage> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (ctx) => StatefulBuilder(
-          builder: (ctx, setState) => Container(
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surfaceContainerHigh,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-            ),
-            padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(ctx).viewInsets.bottom + 32),
-            child: SingleChildScrollView(
-              physics: const BouncingScrollPhysics(),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Center(
-                    child: Container(
-                      width: 32,
-                      height: 4,
-                      decoration: BoxDecoration(color: theme.colorScheme.onSurface.withValues(alpha: 0.12), borderRadius: BorderRadius.circular(2)),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    isEdit ? AppLocalizations.of(context)!.projectSettings : AppLocalizations.of(context)!.createProject,
-                    style: GoogleFonts.inter(fontSize: 22, fontWeight: FontWeight.w900, color: theme.colorScheme.onSurface),
-                  ),
-                  const SizedBox(height: 24),
-                  TextField(
-                    controller: nameCtrl,
-                    autofocus: !isEdit,
-                    style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 16),
-                    decoration: InputDecoration(
-                      hintText: AppLocalizations.of(context)!.projectName,
-                      hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                      filled: true,
-                      fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                    ),
-                  ),
-                  if (!isEdit) ...[
-                    const SizedBox(height: 24),
-                    Text(AppLocalizations.of(context)!.projectType, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                    const SizedBox(height: 12),
-                    Wrap(
-                      spacing: 8,
-                      runSpacing: 8,
-                      children: ProjectType.values.where((type) => type != ProjectType.dart && type != ProjectType.shell && type != ProjectType.other).map((type) {
-                        final isSelected = selectedType == type;
-                        return GestureDetector(
-                          onTap: () => setState(() {
-                            final oldType = selectedType;
-                            selectedType = type;
-                            if ((type == ProjectType.androidJava || type == ProjectType.androidKotlin) && 
-                                (oldType == ProjectType.flutter || sdkCtrl.text == '34')) {
-                              sdkCtrl.text = 'com.example.${nameCtrl.text.isEmpty ? 'app' : nameCtrl.text.toLowerCase().replaceAll('-', '_')}';
-                            } else if (type == ProjectType.flutter && 
-                                       (oldType == ProjectType.androidJava || oldType == ProjectType.androidKotlin || sdkCtrl.text.contains('.'))) {
-                              sdkCtrl.text = '34';
-                            }
-                          }),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.15) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                              borderRadius: BorderRadius.circular(10),
-                              border: Border.all(color: isSelected ? theme.colorScheme.primary : Colors.transparent),
-                            ),
-                            child: Text(
-                              type.name.toUpperCase(),
-                              style: GoogleFonts.inter(color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                    if (selectedType == ProjectType.flutter) ...[
-                      const SizedBox(height: 24),
-                      Text(AppLocalizations.of(context)!.androidCompileSdkVersion, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: sdkCtrl,
-                        keyboardType: TextInputType.number,
-                        style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 14),
-                        decoration: InputDecoration(
-                          hintText: AppLocalizations.of(context)!.defaultSdkVersion,
-                          hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                          filled: true,
-                          fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Text(AppLocalizations.of(context)!.targetPlatforms, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                      const SizedBox(height: 12),
-                      Wrap(
-                        spacing: 8,
-                        runSpacing: 8,
-                        children: availablePlatforms.map((platform) {
-                          final isPlatSelected = selectedPlatforms.contains(platform);
-                          return GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                if (isPlatSelected) {
-                                  if (selectedPlatforms.length > 1) {
-                                    selectedPlatforms.remove(platform);
-                                  }
-                                } else {
-                                  selectedPlatforms.add(platform);
-                                }
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                              decoration: BoxDecoration(
-                                color: isPlatSelected ? theme.colorScheme.primary.withValues(alpha: 0.15) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                                borderRadius: BorderRadius.circular(10),
-                                border: Border.all(color: isPlatSelected ? theme.colorScheme.primary : Colors.transparent),
-                              ),
-                              child: Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    isPlatSelected ? LucideIcons.circle_check : LucideIcons.circle,
-                                    size: 14,
-                                    color: isPlatSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    platform.toUpperCase(),
-                                    style: GoogleFonts.inter(color: isPlatSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
-                      ),
-                    ],
-                    if (selectedType == ProjectType.androidJava || selectedType == ProjectType.androidKotlin) ...[
-                      const SizedBox(height: 24),
-                      Text("PACKAGE NAME (APPLICATION ID)", style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                      const SizedBox(height: 12),
-                      TextField(
-                        controller: sdkCtrl,
-                        keyboardType: TextInputType.text,
-                        style: GoogleFonts.inter(color: theme.colorScheme.onSurface, fontSize: 14),
-                        decoration: InputDecoration(
-                          hintText: "e.g. com.example.myapp",
-                          hintStyle: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5)),
-                          filled: true,
-                          fillColor: theme.colorScheme.onSurface.withValues(alpha: 0.04),
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                        ),
-                      ),
-                    ],
-                  ],
-                  const SizedBox(height: 24),
-                  Text(AppLocalizations.of(context)!.accentColor, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 48,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: selectableColors.length + 1,
-                      separatorBuilder: (context, index) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          final isSelected = selectedColorValue == null;
-                          return GestureDetector(
-                            onTap: () => setState(() => selectedColorValue = null),
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-                                border: Border.all(
-                                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                  width: isSelected ? 2 : 1,
-                                ),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  LucideIcons.ban,
-                                  size: 16,
-                                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        final color = selectableColors[index - 1];
-                        final isSelected = selectedColorValue == color.toARGB32();
-                        return GestureDetector(
-                          onTap: () => setState(() => selectedColorValue = color.toARGB32()),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: color,
-                              border: Border.all(
-                                color: isSelected ? Colors.white : Colors.transparent,
-                                width: isSelected ? 3 : 0,
-                              ),
-                              boxShadow: isSelected ? [
-                                BoxShadow(
-                                  color: color.withValues(alpha: 0.4),
-                                  blurRadius: 10,
-                                  spreadRadius: 2,
-                                )
-                              ] : null,
-                            ),
-                            child: isSelected ? const Center(
-                              child: Icon(LucideIcons.check, color: Colors.white, size: 18),
-                            ) : null,
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(AppLocalizations.of(context)!.projectIcon, style: GoogleFonts.inter(color: theme.colorScheme.onSurfaceVariant, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 1.2)),
-                  const SizedBox(height: 12),
-                  SizedBox(
-                    height: 48,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: selectableIcons.length + 1,
-                      separatorBuilder: (context, index) => const SizedBox(width: 10),
-                      itemBuilder: (context, index) {
-                        if (index == 0) {
-                          final isSelected = selectedIconCodePoint == null;
-                          return GestureDetector(
-                            onTap: () => setState(() {
-                              selectedIconCodePoint = null;
-                              selectedIconFontFamily = null;
-                              selectedIconFontPackage = null;
-                            }),
-                            child: Container(
-                              width: 44,
-                              height: 44,
-                              decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(12),
-                                color: theme.colorScheme.onSurface.withValues(alpha: 0.05),
-                                border: Border.all(
-                                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                  width: isSelected ? 2 : 1,
-                                ),
-                              ),
-                              child: Center(
-                                child: Icon(
-                                  LucideIcons.ban,
-                                  size: 16,
-                                  color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
-                            ),
-                          );
-                        }
-                        final icon = selectableIcons[index - 1];
-                        final isSelected = selectedIconCodePoint == icon.codePoint;
-                        return GestureDetector(
-                          onTap: () => setState(() {
-                            selectedIconCodePoint = icon.codePoint;
-                            selectedIconFontFamily = icon.fontFamily;
-                            selectedIconFontPackage = icon.fontPackage;
-                          }),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 150),
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(12),
-                              color: isSelected ? theme.colorScheme.primary.withValues(alpha: 0.1) : theme.colorScheme.onSurface.withValues(alpha: 0.03),
-                              border: Border.all(
-                                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurface.withValues(alpha: 0.1),
-                                width: isSelected ? 2 : 1,
-                              ),
-                            ),
-                            child: Center(
-                              child: Icon(
-                                icon,
-                                size: 20,
-                                color: isSelected ? theme.colorScheme.primary : theme.colorScheme.onSurfaceVariant,
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  if (creationError != null) ...[
-                    const SizedBox(height: 16),
-                    Container(
-                      padding: const EdgeInsets.all(10),
-                      decoration: BoxDecoration(
-                        color: Colors.redAccent.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.redAccent.withValues(alpha: 0.3)),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(Icons.error_outline, size: 16, color: Colors.redAccent),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              creationError!,
-                              style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 11),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                  SizedBox(
-                    width: double.infinity,
-                    child: ElevatedButton(
-                      onPressed: isCreating ? null : () async {
-                        if (nameCtrl.text.isEmpty) return;
-                        setState(() {
-                          isCreating = true;
-                          creationError = null;
-                        });
-                        try {
-                          if (isEdit) {
-                            await ref.read(projectServiceProvider.notifier).saveProject(Project(
-                              id: project.id,
-                              name: nameCtrl.text,
-                              path: project.path,
-                              type: project.type,
-                              lastOpened: project.lastOpened,
-                              isInternal: project.isInternal,
-                              colorValue: selectedColorValue,
-                              iconCodePoint: selectedIconCodePoint,
-                              iconFontFamily: selectedIconFontFamily,
-                              iconFontPackage: selectedIconFontPackage,
-                              platforms: project.platforms,
-                              sdkVersion: project.sdkVersion,
-                            ));
-                          } else {
-                            await ref.read(projectServiceProvider.notifier).createProject(
-                              name: nameCtrl.text,
-                              path: '',
-                              type: selectedType,
-                              iconCodePoint: selectedIconCodePoint,
-                              colorValue: selectedColorValue,
-                              iconFontFamily: selectedIconFontFamily,
-                              iconFontPackage: selectedIconFontPackage,
-                              platforms: selectedType == ProjectType.flutter ? selectedPlatforms : null,
-                              sdkVersion: (selectedType == ProjectType.flutter || selectedType == ProjectType.androidJava || selectedType == ProjectType.androidKotlin) ? sdkCtrl.text.trim() : null,
-                            );
-                          }
-                          if (ctx.mounted) Navigator.pop(ctx);
-                        } catch (e) {
-                          setState(() {
-                            isCreating = false;
-                            creationError = e.toString();
-                          });
-                        }
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.colorScheme.primary,
-                        foregroundColor: theme.colorScheme.onPrimary,
-                        padding: const EdgeInsets.symmetric(vertical: 18),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                        elevation: 0,
-                      ),
-                      child: isCreating
-                          ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : Text(isEdit ? AppLocalizations.of(context)!.saveAction : AppLocalizations.of(context)!.createProject, style: GoogleFonts.inter(fontWeight: FontWeight.bold)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
+        builder: (_) => FractionallySizedBox(
+          heightFactor: .94,
+          child: content,
         ),
       );
     }

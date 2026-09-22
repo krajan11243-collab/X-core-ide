@@ -87,7 +87,6 @@ class AIState {
   final bool isLoading;
   final List<ChatMessage> messages;
   final String? error;
-  final int totalTokens;
   final List<AIAction> proposedActions;
   final AiApprovalMode approvalMode;
   final AiInteractionMode interactionMode;
@@ -106,7 +105,6 @@ class AIState {
     this.isLoading = false,
     this.messages = const [],
     this.error,
-    this.totalTokens = 0,
     this.proposedActions = const [],
     this.approvalMode = AiApprovalMode.manual,
     this.interactionMode = AiInteractionMode.chat,
@@ -127,7 +125,6 @@ class AIState {
     bool? isLoading,
     List<ChatMessage>? messages,
     String? error,
-    int? totalTokens,
     List<AIAction>? proposedActions,
     AiApprovalMode? approvalMode,
     AiInteractionMode? interactionMode,
@@ -146,7 +143,6 @@ class AIState {
       isLoading: isLoading ?? this.isLoading,
       messages: messages ?? this.messages,
       error: error ?? this.error,
-      totalTokens: totalTokens ?? this.totalTokens,
       proposedActions: proposedActions ?? this.proposedActions,
       approvalMode: approvalMode ?? 
           (isAutopilot != null 
@@ -318,7 +314,6 @@ class AINotifier extends StateNotifier<AIState> {
         
         buf.writeln('## Session Stats');
         buf.writeln('- Total messages: ${state.messages.length}');
-        buf.writeln('- Total tokens used: ${state.totalTokens}');
         buf.writeln('- Files read: ${state.agentReadFiles.length}');
       }
       
@@ -701,8 +696,6 @@ class AINotifier extends StateNotifier<AIState> {
       imageBase64: imageBase64,
     );
 
-    final userTokens = _estimateTokens(prompt);
-
     final isAutopilot = state.interactionMode == AiInteractionMode.autopilot;
     final isAsk = state.interactionMode == AiInteractionMode.ask;
     final isDebug = state.interactionMode == AiInteractionMode.debug;
@@ -724,18 +717,12 @@ class AINotifier extends StateNotifier<AIState> {
     state = state.copyWith(
       isLoading: true,
       error: null,
-      totalTokens: state.totalTokens + userTokens,
       activeAgentRole: isAutopilot ? 'Planner' : (isDebug ? 'Debugger' : null),
       currentStatusMessage: isAutopilot ? l10n.analyzingTaskAndPlanning : (isDebug ? 'Анализ бага...' : null),
     );
     _updateMessagesAndSync([...state.messages, userMessage]);
 
     final workspacePath = _ref.read(workspaceProvider).currentPath;
-    if (state.totalTokens > 30000 && state.messages.length > 20) {
-      // Run compression asynchronously
-      _compressOldMessages(workspacePath);
-    }
-
     int currentStep = 0;
     const maxSteps = 50;
     String nextPrompt = prompt;
@@ -898,15 +885,20 @@ class AINotifier extends StateNotifier<AIState> {
         }
 
         // Prepare conversation history
-        final history = state.messages
+        // No app-side token budget. Keep only a bounded recent window so
+        // provider context limits can never silently stop a long-running chat.
+        final previousMessages = state.messages
             .where((m) => m != state.messages.last)
-            .map((m) => {
-                  'role': m.role == MessageRole.user 
-                      ? 'user' 
-                      : (m.role == MessageRole.system ? 'user' : 'assistant'),
-                  'content': m.content,
-                })
             .toList();
+        final recentMessages = previousMessages.length > 24
+            ? previousMessages.sublist(previousMessages.length - 24)
+            : previousMessages;
+        final history = recentMessages.map((m) => {
+          'role': m.role == MessageRole.user
+              ? 'user'
+              : (m.role == MessageRole.system ? 'user' : 'assistant'),
+          'content': m.content,
+        }).toList();
 
         // Get completion from AI service
         String responseText;

@@ -1015,10 +1015,7 @@ class AINotifier extends StateNotifier<AIState> {
           actions: actions.isNotEmpty ? actions : null,
         );
 
-        state = state.copyWith(
-          lastPromptTokens: promptTokens,
-          lastCompletionTokens: completionTokens,
-        );
+        state = state.copyWith();
         _updateMessagesAndSync([...state.messages, assistantMessage]);
 
         // Plan → Build flow: save plan to file if in plan mode

@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 enum XCoreTechLogo {
@@ -103,7 +104,7 @@ class _XCoreTechLogoPainter extends CustomPainter {
         final path = Path();
         for (int i = 0; i < 6; i++) {
           final a = -3.1415926535 / 2 + i * 3.1415926535 / 3;
-          final pt = Offset(c.dx + 13 * s * (a == a ? 1 : 1) * _cos(a), c.dy + 13 * s * _sin(a));
+          final pt = Offset(c.dx + 13 * s * (math.cos(a), c.dy + 13 * s * math.sin(a));
           if (i == 0) {
             path.moveTo(pt.dx, pt.dy);
           } else {
@@ -168,16 +169,6 @@ class _XCoreTechLogoPainter extends CustomPainter {
         canvas.drawLine(10 * s, c.dy, 22 * s, c.dy, stroke);
         break;
     }
-  }
-
-  double _cos(double a) => a == 0 ? 1 : (a == 3.1415926535 ? -1 : _sin(a + 3.1415926535 / 2));
-  double _sin(double a) {
-    // Small-angle lookup-free approximation is sufficient for these vector icons.
-    double x = a % (2 * 3.1415926535);
-    if (x < 0) x += 2 * 3.1415926535;
-    if (x > 3.1415926535) return -_sin(x - 3.1415926535);
-    final t = x / 3.1415926535;
-    return 4 * t * (1 - t);
   }
 
   @override

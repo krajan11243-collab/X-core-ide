@@ -206,8 +206,8 @@ class _XCorePlatformLogoPainter extends CustomPainter {
           ..lineTo(19*s,27*s)..cubicTo(24*s,26*s,26*s,21*s,23*s,18*s)
           ..cubicTo(24*s,11*s,22*s,4*s,16*s,4*s)..close();
         canvas.drawPath(head,fill);
-        canvas.drawCircle(13*s,15*s,1.1*s,Paint()..color=Colors.black);
-        canvas.drawCircle(19*s,15*s,1.1*s,Paint()..color=Colors.black);
+        canvas.drawCircle(Offset(13*s,15*s),1.1*s,Paint()..color=Colors.black);
+        canvas.drawCircle(Offset(19*s,15*s),1.1*s,Paint()..color=Colors.black);
         final beak=Path()..moveTo(15*s,17*s)..lineTo(20*s,18*s)..lineTo(15*s,20*s)..close();
         canvas.drawPath(beak,Paint()..color=Colors.black);
         break;

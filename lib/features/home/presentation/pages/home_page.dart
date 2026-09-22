@@ -291,12 +291,12 @@ class _HomePageState extends ConsumerState<HomePage> {
                     menuItem(LucideIcons.layout_grid, 'Market', cyan, () { Navigator.pop(ctx); context.push('/packages'); }),
                     menuItem(LucideIcons.server, 'Servers', pink, () { Navigator.pop(ctx); context.push('/servers'); }),
                     menuItem(LucideIcons.settings, 'Settings', const Color(0xFFA855F7), () { Navigator.pop(ctx); context.push('/settings'); }),
-                    menuItem(LucideIcons.github, 'GitHub', text, () { Navigator.pop(ctx); context.push('/github'); }),
+                    menuItem(LucideIcons.git_branch, 'GitHub', text, () { Navigator.pop(ctx); context.push('/github'); }),
                   ])),
                   Divider(color: text.withValues(alpha: .12)),
                   const SizedBox(height: 10),
                   Row(children: [
-                    Container(width: 42, height: 42, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: cyan.withValues(alpha: .45))), child: const Icon(LucideIcons.code_2, color: cyan)),
+                    Container(width: 42, height: 42, decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: cyan.withValues(alpha: .45))), child: const Icon(LucideIcons.code, color: cyan)),
                     const SizedBox(width: 12),
                     Text('X-core IDE', style: GoogleFonts.inter(fontWeight: FontWeight.w800, color: text)),
                     const Spacer(),
@@ -338,7 +338,7 @@ class _HomePageState extends ConsumerState<HomePage> {
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 22, 20, 0), child: lastProject == null ? Container(height: 120, decoration: BoxDecoration(borderRadius: BorderRadius.circular(22), border: Border.all(color: purple.withValues(alpha: .3))), child: Center(child: Text('Create your first X-core project', style: GoogleFonts.inter(color: muted, fontWeight: FontWeight.w600)))) : resumeCard(lastProject))),
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 24, 20, 10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Projects (' + projects.length.toString() + ')', style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800, color: text)), Icon(LucideIcons.list_filter, size: 18, color: muted)]))),
           if (projects.isEmpty)
-            SliverFillRemaining(hasScrollBody: false, child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 100), child: ElevatedButton.icon(onPressed: onCreateProject, icon: const Icon(LucideIcons.plus), label: const Text('Create Project'), style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, foregroundColor: theme.colorScheme.onPrimary, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)))))))
+            SliverFillRemaining(hasScrollBody: false, child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 100), child: ElevatedButton.icon(onPressed: () => _showProjectDialog(context, ref), icon: const Icon(LucideIcons.plus), label: const Text('Create Project'), style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, foregroundColor: theme.colorScheme.onPrimary, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)))))))
           else
             SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 110), sliver: SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => projectCard(projects[i]), childCount: projects.length))),
         ])),
@@ -346,7 +346,7 @@ class _HomePageState extends ConsumerState<HomePage> {
       floatingActionButton: Padding(
         padding: const EdgeInsets.only(right: 2, bottom: 3),
         child: FloatingActionButton(
-          onPressed: onCreateProject,
+          onPressed: () => _showProjectDialog(context, ref),
           elevation: 12,
           backgroundColor: purple,
           foregroundColor: Colors.white,

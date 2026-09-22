@@ -137,7 +137,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                 Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(18, 8, 18, bottom + 22),
+                padding: EdgeInsets.fromLTRB(27, 8, 27, bottom + 28),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -189,7 +189,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   }
 
   Widget _header() => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 14, 12, 4),
+    padding: const EdgeInsets.fromLTRB(37, 18, 36, 8),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -199,15 +199,15 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
             children: [
               Text.rich(TextSpan(children: [
                 TextSpan(text: 'Create ', style: GoogleFonts.inter(
-                  fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white,
+                  fontSize: 47, fontWeight: FontWeight.w900, color: Colors.white,
                 )),
                 TextSpan(text: 'Project', style: GoogleFonts.inter(
-                  fontSize: 31, fontWeight: FontWeight.w900, color: pink,
+                  fontSize: 45, fontWeight: FontWeight.w900, color: pink,
                 )),
               ])),
               const SizedBox(height: 2),
               Text('Start building something amazing',
-                style: GoogleFonts.inter(color: muted, fontSize: 14)),
+                style: GoogleFonts.inter(color: muted, fontSize: 19)),
             ],
           ),
         ),
@@ -220,7 +220,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     onTap: () => Navigator.pop(context),
     borderRadius: BorderRadius.circular(16),
     child: Container(
-      width: 68, height: 68,
+      width: 62, height: 62,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .035),
         borderRadius: BorderRadius.circular(16),
@@ -231,16 +231,16 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _projectName() => Container(
-    padding: const EdgeInsets.fromLTRB(12, 10, 12, 10),
+    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
     decoration: BoxDecoration(
       color: panel,
-      borderRadius: BorderRadius.circular(18),
-      border: Border.all(color: cyan.withValues(alpha: .15)),
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: cyan.withValues(alpha: .18)),
       boxShadow: [BoxShadow(color: purple.withValues(alpha: .05), blurRadius: 18)],
     ),
     child: Row(children: [
       Container(
-        width: 54, height: 54,
+        width: 78, height: 78,
         decoration: BoxDecoration(
           color: purple.withValues(alpha: .10),
           borderRadius: BorderRadius.circular(14),
@@ -248,16 +248,16 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         ),
         child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 27),
       ),
-      const SizedBox(width: 10),
+      const SizedBox(width: 18),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Project Name', style: GoogleFonts.inter(color: const Color(0xFFB4A9C9), fontSize: 11, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 4),
+            Text('Project Name', style: GoogleFonts.inter(color: const Color(0xFFB4A9C9), fontSize: 17, fontWeight: FontWeight.w500)),
+            const SizedBox(height: 7),
             Container(
-              height: 34,
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              height: 64,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
               decoration: BoxDecoration(
                 color: field,
                 borderRadius: BorderRadius.circular(12),
@@ -266,10 +266,10 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               alignment: Alignment.centerLeft,
               child: TextField(
                 controller: nameCtrl,
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
                 decoration: InputDecoration(
                   hintText: 'Project Name',
-                  hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .58), fontSize: 13),
+                  hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .58), fontSize: 18),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -299,36 +299,72 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     ),
   );
 
-  Widget _sdkField() => _inputField('Compile SDK', '34', LucideIcons.cpu, number: true);
+  Widget _sdkField() => Container(
+    height: 90,
+    decoration: BoxDecoration(
+      color: field,
+      borderRadius: BorderRadius.circular(24),
+      border: Border.all(color: Colors.white.withValues(alpha: .10)),
+    ),
+    child: Row(
+      children: [
+        const SizedBox(width: 18),
+        Container(
+          width: 54,
+          height: 54,
+          decoration: BoxDecoration(
+            color: pink.withValues(alpha: .08),
+            borderRadius: BorderRadius.circular(15),
+          ),
+          child: const Icon(LucideIcons.cpu, color: pink, size: 31),
+        ),
+        const SizedBox(width: 18),
+        Expanded(
+          child: TextField(
+            controller: sdkCtrl,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w600),
+            decoration: InputDecoration(
+              labelText: 'Compile SDK',
+              labelStyle: GoogleFonts.inter(color: muted, fontSize: 17),
+              border: InputBorder.none,
+              contentPadding: const EdgeInsets.only(bottom: 1),
+            ),
+          ),
+        ),
+        const SizedBox(width: 18),
+      ],
+    ),
+  );
 
   Widget _section(IconData icon, String title, String hint) => Row(
     children: [
       Container(
-        width: 31, height: 31,
+        width: 58, height: 58,
         decoration: BoxDecoration(
           color: purple.withValues(alpha: .10),
-          borderRadius: BorderRadius.circular(9),
+          borderRadius: BorderRadius.circular(16),
           border: Border.all(color: purple.withValues(alpha: .28)),
         ),
-        child: Icon(icon, color: purple, size: 18),
+        child: Icon(icon, color: purple, size: 27),
       ),
       const SizedBox(width: 9),
       Expanded(
         child: Text(title,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 12.8, fontWeight: FontWeight.w900)),
+          style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
       ),
       const SizedBox(width: 7),
       Flexible(
         flex: 0,
         child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
-          const SizedBox(width: 5),
+          Container(width: 9, height: 9, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
+          const SizedBox(width: 10),
           ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 155),
             child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(color: muted, fontSize: 8.8, fontWeight: FontWeight.w500)),
+              style: GoogleFonts.inter(color: muted, fontSize: 13.5, fontWeight: FontWeight.w500)),
           ),
         ]),
       ),
@@ -336,7 +372,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _typeGrid() => LayoutBuilder(builder: (context, constraints) {
-    const gap = 8.0;
+    const gap = 12.0;
     final unit = (constraints.maxWidth - gap * 3) / 4;
 
     final items = <Map<String, dynamic>>[
@@ -356,7 +392,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
       return SizedBox(
         width: width,
-        height: 66,
+        height: 72,
         child: Material(
           color: Colors.transparent,
           child: InkWell(
@@ -370,7 +406,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
             borderRadius: BorderRadius.circular(14),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 7),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
               decoration: BoxDecoration(
                 color: selected ? color.withValues(alpha: .105) : panel,
                 borderRadius: BorderRadius.circular(14),
@@ -387,17 +423,17 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                   Row(
                     children: [
                       Container(
-                        width: 33,
-                        height: 33,
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
                           color: selected ? color.withValues(alpha: .12) : Colors.white.withValues(alpha: .025),
-                          borderRadius: BorderRadius.circular(9),
+                          borderRadius: BorderRadius.circular(13),
                         ),
                         alignment: Alignment.center,
                         child: XCoreTechIcon(
                           logo: logo,
                           color: selected ? color : Colors.white70,
-                          size: 22,
+                          size: 31,
                         ),
                       ),
                       const SizedBox(width: 5),
@@ -411,7 +447,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                             overflow: TextOverflow.clip,
                             style: GoogleFonts.inter(
                               color: selected ? Colors.white : Colors.white70,
-                              fontSize: 7.7,
+                              fontSize: 11.5,
                               fontWeight: FontWeight.w900,
                               letterSpacing: .01,
                             ),
@@ -425,14 +461,14 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                       right: -1,
                       top: -1,
                       child: Container(
-                        width: 16,
-                        height: 16,
+                        width: 20,
+                        height: 20,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: panel,
                           border: Border.all(color: color, width: 1.2),
                         ),
-                        child: Icon(LucideIcons.check, color: color, size: 9),
+                        child: Icon(LucideIcons.check, color: color, size: 11),
                       ),
                     ),
                 ],
@@ -488,7 +524,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
         return SizedBox(
           width: width,
-          height: 58,
+          height: 68,
           child: Material(
             color: Colors.transparent,
             child: InkWell(
@@ -521,7 +557,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                       color: selected ? pink : Colors.white70,
                       size: 21,
                     ),
-                    const SizedBox(width: 6),
+                    const SizedBox(width: 10),
                     Flexible(
                       child: Text(
                         item['name'] as String,
@@ -529,7 +565,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.inter(
                           color: selected ? Colors.white : Colors.white70,
-                          fontSize: 9.2,
+                          fontSize: 13.5,
                           fontWeight: FontWeight.w900,
                         ),
                       ),
@@ -548,7 +584,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     );
   });
   Widget _colorRow() => SizedBox(
-    height: 72,
+    height: 98,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -562,23 +598,44 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     final selected = c == null ? colorValue == null : colorValue == c.toARGB32();
     return InkWell(
       onTap: () => setState(() => colorValue = c?.toARGB32()),
-      borderRadius: BorderRadius.circular(15),
+      borderRadius: BorderRadius.circular(18),
       child: Container(
-        width: 58, height: 58,
+        width: 88,
+        height: 94,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          color: c ?? panel,
-          border: Border.all(color: selected ? pink : Colors.white.withValues(alpha: .10), width: selected ? 2.5 : 1),
-          boxShadow: selected ? [BoxShadow(color: (c ?? pink).withValues(alpha: .22), blurRadius: 14)] : null,
+          color: panel,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(
+            color: selected ? pink : Colors.white.withValues(alpha: .08),
+            width: selected ? 2.5 : 1,
+          ),
+          boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 18)] : null,
         ),
-        child: c == null ? Icon(LucideIcons.ban, color: selected ? pink : Colors.white70, size: 20)
-          : selected ? const Icon(LucideIcons.check, color: Colors.white, size: 19) : null,
+        child: Center(
+          child: c == null
+              ? Container(
+                  width: 62,
+                  height: 62,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: field,
+                    border: Border.all(color: pink, width: 2.5),
+                  ),
+                  child: const Icon(LucideIcons.ban, color: pink, size: 27),
+                )
+              : Container(
+                  width: 62,
+                  height: 62,
+                  decoration: BoxDecoration(shape: BoxShape.circle, color: c),
+                  child: selected ? const Icon(LucideIcons.check, color: Colors.white, size: 22) : null,
+                ),
+        ),
       ),
     );
   }
 
   Widget _iconRow() => SizedBox(
-    height: 72,
+    height: 98,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -599,32 +656,35 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               iconFontPackage = icon.fontPackage;
             }
           }),
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: BorderRadius.circular(18),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 140),
-            width: 68, height: 68,
+            width: 92,
+            height: 94,
             decoration: BoxDecoration(
               color: selected ? pink.withValues(alpha: .075) : panel,
-              borderRadius: BorderRadius.circular(16),
+              borderRadius: BorderRadius.circular(18),
               border: Border.all(
                 color: selected ? pink : Colors.white.withValues(alpha: .10),
-                width: selected ? 2 : 1,
+                width: selected ? 2.5 : 1,
               ),
               boxShadow: selected
-                  ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 16, spreadRadius: -3)]
+                  ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 18)]
                   : null,
             ),
             child: Stack(
               alignment: Alignment.center,
               children: [
-                Icon(icon, color: selected ? pink : Colors.white70, size: 25),
+                Icon(icon, color: selected ? pink : Colors.white70, size: 34),
                 if (selected)
                   Positioned(
-                    right: 5, top: 5,
+                    right: 7,
+                    top: 7,
                     child: Container(
-                      width: 15, height: 15,
+                      width: 22,
+                      height: 22,
                       decoration: const BoxDecoration(shape: BoxShape.circle, color: pink),
-                      child: const Icon(LucideIcons.check, color: Colors.white, size: 10),
+                      child: const Icon(LucideIcons.check, color: Colors.white, size: 13),
                     ),
                   ),
               ],
@@ -646,76 +706,58 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     child: Text(error!, style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 11)),
   );
 
-  Widget _createButton() => SizedBox(
-    width: double.infinity,
-    height: 92,
-    child: Material(
-      color: Colors.transparent,
-      borderRadius: BorderRadius.circular(22),
-      child: Ink(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFF16D8), Color(0xFFB02CFF), Color(0xFF3F64FF)],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
+  Widget _createButton() => Padding(
+    padding: const EdgeInsets.symmetric(horizontal: 8),
+    child: SizedBox(
+      width: double.infinity,
+      height: 98,
+      child: Material(
+        color: Colors.transparent,
+        borderRadius: BorderRadius.circular(24),
+        child: Ink(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(24),
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF16D8), Color(0xFFB02CFF), Color(0xFF3F64FF)],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
+            boxShadow: [
+              BoxShadow(color: Color(0xFFFF16D8), blurRadius: 30, spreadRadius: -9, offset: Offset(0, 9)),
+              BoxShadow(color: Color(0xFF5A52FF), blurRadius: 24, spreadRadius: -12, offset: Offset(8, 5)),
+            ],
           ),
-          boxShadow: [
-            BoxShadow(
-              color: Color(0xFFFF16D8),
-              blurRadius: 30,
-              spreadRadius: -9,
-              offset: Offset(0, 9),
-            ),
-            BoxShadow(
-              color: Color(0xFF5A52FF),
-              blurRadius: 24,
-              spreadRadius: -12,
-              offset: Offset(8, 5),
-            ),
-          ],
-        ),
-        child: InkWell(
-          onTap: busy ? null : save,
-          borderRadius: BorderRadius.circular(22),
-          splashColor: Colors.white.withValues(alpha: .14),
-          highlightColor: Colors.white.withValues(alpha: .06),
-          child: Center(
-            child: busy
-                ? const SizedBox(
-                    width: 30,
-                    height: 30,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: Colors.white,
-                    ),
-                  )
-                : Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      const Icon(
-                        LucideIcons.sparkles,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                      const SizedBox(width: 14),
-                      Text(
-                        widget.project == null ? 'Create Project' : 'Save Changes',
-                        style: GoogleFonts.inter(
-                          color: Colors.white,
-                          fontSize: 23,
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: -.35,
+          child: InkWell(
+            onTap: busy ? null : save,
+            borderRadius: BorderRadius.circular(24),
+            splashColor: Colors.white.withValues(alpha: .14),
+            highlightColor: Colors.white.withValues(alpha: .06),
+            child: Center(
+              child: busy
+                  ? const SizedBox(
+                      width: 30,
+                      height: 30,
+                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                    )
+                  : Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(LucideIcons.sparkles, color: Colors.white, size: 30),
+                        const SizedBox(width: 16),
+                        Text(
+                          widget.project == null ? 'Create Project' : 'Save Changes',
+                          style: GoogleFonts.inter(
+                            color: Colors.white,
+                            fontSize: 24,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -.35,
+                          ),
                         ),
-                      ),
-                      const SizedBox(width: 18),
-                      const Icon(
-                        LucideIcons.arrow_right,
-                        color: Colors.white,
-                        size: 31,
-                      ),
-                    ],
-                  ),
+                        const SizedBox(width: 22),
+                        const Icon(LucideIcons.arrow_right, color: Colors.white, size: 31),
+                      ],
+                    ),
+            ),
           ),
         ),
       ),

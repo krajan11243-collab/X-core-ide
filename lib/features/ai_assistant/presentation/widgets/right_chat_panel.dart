@@ -1217,37 +1217,41 @@ class _RightChatPanelState extends ConsumerState<RightChatPanel> {
                       ),
                     ),
                     const SizedBox(width: 4),
-                    // Send Button
+                    // Send Button — explicit full hit area; never depends on the icon's bounds.
                     SizedBox(
-                      width: 40,
-                      height: 40,
-                      child: Material(
-                        color: Colors.transparent,
-                        shape: const CircleBorder(),
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFFFF18D7), Color(0xFF9B35FF), Color(0xFF28B8FF)],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white.withValues(alpha: .22), width: 1),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0xFF9B35FF),
-                                blurRadius: 14,
-                                spreadRadius: -5,
-                              ),
-                            ],
+                      width: 44,
+                      height: 44,
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFF18D7), Color(0xFF9B35FF), Color(0xFF28B8FF)],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
+                          border: Border.all(color: Colors.white.withValues(alpha: .24), width: 1),
+                          boxShadow: const [
+                            BoxShadow(
+                              color: Color(0xFF9B35FF),
+                              blurRadius: 14,
+                              spreadRadius: -5,
+                            ),
+                          ],
+                        ),
+                        child: Material(
+                          color: Colors.transparent,
+                          shape: const CircleBorder(),
+                          clipBehavior: Clip.antiAlias,
                           child: InkWell(
-                            onTap: () => _sendMessage(context, ref),
+                            onTap: () async {
+                              FocusScope.of(context).unfocus();
+                              await _sendMessage(context, ref);
+                            },
                             customBorder: const CircleBorder(),
-                            splashColor: Colors.white.withValues(alpha: .18),
-                            highlightColor: Colors.white.withValues(alpha: .08),
+                            splashColor: Colors.white.withValues(alpha: .22),
+                            highlightColor: Colors.white.withValues(alpha: .10),
                             child: const Center(
-                              child: Icon(LucideIcons.send, color: Colors.white, size: 16),
+                              child: Icon(LucideIcons.send, color: Colors.white, size: 17),
                             ),
                           ),
                         ),

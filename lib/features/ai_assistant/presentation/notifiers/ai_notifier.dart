@@ -98,8 +98,6 @@ class AIState {
   final List<ChatSession> sessions;
   final String? currentSessionId;
   final String? sessionGoal;
-  final int lastPromptTokens;
-  final int lastCompletionTokens;
 
   AIState({
     this.isLoading = false,
@@ -115,8 +113,6 @@ class AIState {
     this.sessions = const [],
     this.currentSessionId,
     this.sessionGoal,
-    this.lastPromptTokens = 0,
-    this.lastCompletionTokens = 0,
   });
 
   bool get isAutopilot => approvalMode != AiApprovalMode.manual;
@@ -136,8 +132,6 @@ class AIState {
     List<ChatSession>? sessions,
     String? currentSessionId,
     String? sessionGoal,
-    int? lastPromptTokens,
-    int? lastCompletionTokens,
   }) {
     return AIState(
       isLoading: isLoading ?? this.isLoading,
@@ -156,8 +150,6 @@ class AIState {
       sessions: sessions ?? this.sessions,
       currentSessionId: currentSessionId ?? this.currentSessionId,
       sessionGoal: sessionGoal ?? this.sessionGoal,
-      lastPromptTokens: lastPromptTokens ?? this.lastPromptTokens,
-      lastCompletionTokens: lastCompletionTokens ?? this.lastCompletionTokens,
     );
   }
 }

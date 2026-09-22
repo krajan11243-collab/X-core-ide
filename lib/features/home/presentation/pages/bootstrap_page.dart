@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/services/runtime_service.dart';
 import '../../../../core/services/workspace_service.dart';
 
@@ -15,13 +16,23 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
   static const bg = Color(0xFF020205);
   static const pink = Color(0xFFFF3B6B);
   static const hotPink = Color(0xFFFF168D);
+  bool _splashVisible = true;
+  bool _preferenceLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final hasShownBootstrap = prefs.getBool('xcore_bootstrap_shown') ?? false;
+      if (mounted) {
+        setState(() {
+          _preferenceLoaded = true;
+          _splashVisible = !hasShownBootstrap;
+        });
+      }
       _checkReady();
-      _startInit();
+      _startInit(prefs);
     });
   }
 
@@ -29,7 +40,7 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
     if (ref.read(runtimeServiceProvider).isInitialized) context.go('/');
   }
 
-  Future<void> _startInit() async {
+  Future<void> _startInit(SharedPreferences prefs) async {
     final runtime = ref.read(runtimeServiceProvider);
     final router = GoRouter.of(context);
     await runtime.init();
@@ -39,6 +50,7 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
       } catch (e) {
         debugPrint('Failed to restore last workspace: $e');
       }
+      await prefs.setBool('xcore_bootstrap_shown', true);
       if (mounted) router.go('/');
     }
   }
@@ -46,6 +58,11 @@ class _BootstrapPageState extends ConsumerState<BootstrapPage> {
   @override
   Widget build(BuildContext context) {
     final runtime = ref.watch(runtimeServiceProvider);
+    if (_preferenceLoaded && !_splashVisible) {
+      // Runtime is still initialized silently on later launches; the
+      // full bootstrap/loading screen is shown only on the first launch.
+      return const Scaffold(backgroundColor: bg);
+    }
     final progress = runtime.progress.clamp(0.0, 1.0);
     return Scaffold(
       backgroundColor: bg,

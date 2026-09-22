@@ -492,15 +492,9 @@ class _RightChatPanelState extends ConsumerState<RightChatPanel> {
           if (aiState.interactionMode == AiInteractionMode.autopilot || aiState.interactionMode == AiInteractionMode.debug)
             _buildAgentPipelineBadge(aiState),
           
-          // Token and System Stats Badges
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildTokenBadge(aiState),
-              const SizedBox(width: 4),
-              _buildSystemStatsBadge(ref),
-            ],
-          ),
+          // System stats only. Token/quota badges are intentionally removed
+          // so chat remains clean and is not presented as a token-limited UI.
+          _buildSystemStatsBadge(ref),
         ],
       ),
     );
@@ -546,51 +540,6 @@ class _RightChatPanelState extends ConsumerState<RightChatPanel> {
         ],
       ),
     );
-  }
-
-  Widget _buildTokenBadge(AIState aiState) {
-    final prompt = aiState.lastPromptTokens;
-    final completion = aiState.lastCompletionTokens;
-    final hasRealTokens = prompt > 0 || completion > 0;
-    final total = aiState.totalTokens;
-    final cost = _estimateCost(prompt, completion);
-    final displayText = hasRealTokens
-        ? '$prompt↓ $completion↑'
-        : '$total';
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: Colors.purpleAccent.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(LucideIcons.coins, size: 10, color: Colors.purpleAccent),
-          const SizedBox(width: 4),
-          Tooltip(
-            message: hasRealTokens
-                ? 'Prompt: $prompt | Completion: $completion\nОценка стоимости: $cost'
-                : 'Estimated: $total tokens',
-            child: Text(
-              displayText,
-              style: GoogleFonts.jetBrainsMono(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _estimateCost(int promptTokens, int completionTokens) {
-    const promptPricePer1k = 0.00015;
-    const completionPricePer1k = 0.0006;
-    final promptCost = (promptTokens / 1000) * promptPricePer1k;
-    final completionCost = (completionTokens / 1000) * completionPricePer1k;
-    final total = promptCost + completionCost;
-    if (total < 0.001) return '< 0.001 USD';
-    return '\$ ${total.toStringAsFixed(4)}';
   }
 
   Widget _buildSystemStatsBadge(WidgetRef ref) {
@@ -1274,23 +1223,25 @@ class _RightChatPanelState extends ConsumerState<RightChatPanel> {
                       height: 32,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
-                          colors: [Colors.purpleAccent, Colors.cyanAccent],
+                          colors: [Color(0xFFFF18D7), Color(0xFF9B35FF), Color(0xFF28B8FF)],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
                         shape: BoxShape.circle,
+                        border: Border.all(color: Colors.white.withValues(alpha: .22), width: 1),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.purpleAccent.withValues(alpha: 0.25),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
+                            color: Color(0xFF9B35FF),
+                            blurRadius: 14,
+                            spreadRadius: -5,
                           ),
                         ],
                       ),
                       child: IconButton(
-                        icon: const Icon(LucideIcons.send, color: Colors.white, size: 13),
+                        icon: const Icon(LucideIcons.send, color: Colors.white, size: 14),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
+                        tooltip: 'Send message',
                         onPressed: () => _sendMessage(context, ref),
                       ),
                     ),

@@ -22,7 +22,7 @@ class QuantumApp extends ConsumerWidget {
         : null;
 
     return MaterialApp.router(
-      title: 'QuantumIDE',
+      title: 'X-core IDE',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(scheme, customColor: customColor),
       darkTheme: AppTheme.dark(scheme, customColor: customColor),

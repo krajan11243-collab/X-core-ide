@@ -307,7 +307,14 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         child: Row(mainAxisSize: MainAxisSize.min, children: [
           Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: xPurple)),
           const SizedBox(width: 5),
-          Flexible(child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(fontSize: 9.5, color: theme.colorScheme.onSurfaceVariant))),
+          Flexible(
+            child: Text(
+              hint,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: GoogleFonts.inter(fontSize: 9.5, color: theme.colorScheme.onSurfaceVariant),
+            ),
+          ),
         ]),
       ),
     ],

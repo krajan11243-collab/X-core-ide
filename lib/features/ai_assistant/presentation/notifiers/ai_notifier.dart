@@ -1016,7 +1016,6 @@ class AINotifier extends StateNotifier<AIState> {
         );
 
         state = state.copyWith(
-          totalTokens: state.totalTokens + responseTokens,
           lastPromptTokens: promptTokens,
           lastCompletionTokens: completionTokens,
         );
@@ -1959,7 +1958,6 @@ $history
       final remainingMessages = state.messages.sublist(state.messages.length - 10);
       state = state.copyWith(
         messages: remainingMessages,
-        totalTokens: state.totalTokens ~/ 2, // rough estimation
       );
     } catch (e) {
       debugPrint('Context compression failed: \$e');

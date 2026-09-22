@@ -15,6 +15,9 @@ class XCoreProjectWizard extends ConsumerStatefulWidget {
 }
 
 class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
+  static const xPink = Color(0xFFFF16D8);
+  static const xPurple = Color(0xFF9B00FF);
+  static const xBlue = Color(0xFF4F46FF);
   late TextEditingController nameCtrl;
   late TextEditingController sdkCtrl;
   late ProjectType type;

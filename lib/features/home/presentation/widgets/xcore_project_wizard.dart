@@ -648,111 +648,74 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
   Widget _createButton() => SizedBox(
     width: double.infinity,
-    height: 72,
-    child: DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(21),
-        gradient: const LinearGradient(
-          colors: [pink, Color(0xFFB42BFF), blue],
-          begin: Alignment.centerLeft,
-          end: Alignment.centerRight,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: pink.withValues(alpha: .22),
-            blurRadius: 26,
-            spreadRadius: -6,
-            offset: const Offset(0, 7),
+    height: 92,
+    child: Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(22),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(22),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF16D8), Color(0xFFB02CFF), Color(0xFF3F64FF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-        ],
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(1.3),
-        child: Material(
-          color: Colors.transparent,
-          borderRadius: BorderRadius.circular(20),
-          child: InkWell(
-            onTap: busy ? null : save,
-            borderRadius: BorderRadius.circular(20),
-            child: Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-                gradient: const LinearGradient(
-                  colors: [Color(0xFFFF20D9), Color(0xFFA735FF), Color(0xFF4165FF)],
-                ),
-              ),
-              child: busy
-                  ? const Center(
-                      child: SizedBox(
-                        width: 24,
-                        height: 24,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.2,
+          boxShadow: [
+            BoxShadow(
+              color: Color(0xFFFF16D8),
+              blurRadius: 30,
+              spreadRadius: -9,
+              offset: Offset(0, 9),
+            ),
+            BoxShadow(
+              color: Color(0xFF5A52FF),
+              blurRadius: 24,
+              spreadRadius: -12,
+              offset: Offset(8, 5),
+            ),
+          ],
+        ),
+        child: InkWell(
+          onTap: busy ? null : save,
+          borderRadius: BorderRadius.circular(22),
+          splashColor: Colors.white.withValues(alpha: .14),
+          highlightColor: Colors.white.withValues(alpha: .06),
+          child: Center(
+            child: busy
+                ? const SizedBox(
+                    width: 30,
+                    height: 30,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
+                    ),
+                  )
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        LucideIcons.sparkles,
+                        color: Colors.white,
+                        size: 30,
+                      ),
+                      const SizedBox(width: 14),
+                      Text(
+                        widget.project == null ? 'Create Project' : 'Save Changes',
+                        style: GoogleFonts.inter(
                           color: Colors.white,
+                          fontSize: 23,
+                          fontWeight: FontWeight.w900,
+                          letterSpacing: -.35,
                         ),
                       ),
-                    )
-                  : Row(
-                      children: [
-                        const SizedBox(width: 18),
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: .13),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: .28),
-                              width: 1,
-                            ),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.white.withValues(alpha: .10),
-                                blurRadius: 10,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            LucideIcons.sparkles,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Text(
-                            widget.project == null ? 'Create Project' : 'Save Changes',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: GoogleFonts.inter(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: -.2,
-                            ),
-                          ),
-                        ),
-                        Container(
-                          width: 42,
-                          height: 42,
-                          margin: const EdgeInsets.only(right: 13),
-                          decoration: BoxDecoration(
-                            color: Colors.black.withValues(alpha: .13),
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: Colors.white.withValues(alpha: .22),
-                              width: 1,
-                            ),
-                          ),
-                          child: const Icon(
-                            LucideIcons.arrow_right,
-                            color: Colors.white,
-                            size: 22,
-                          ),
-                        ),
-                      ],
-                    ),
-            ),
+                      const SizedBox(width: 18),
+                      const Icon(
+                        LucideIcons.arrow_right,
+                        color: Colors.white,
+                        size: 31,
+                      ),
+                    ],
+                  ),
           ),
         ),
       ),

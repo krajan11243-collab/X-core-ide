@@ -138,7 +138,7 @@ class _HomePageState extends ConsumerState<HomePage> {
                   ),
                   const SizedBox(width: 14),
                   Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                    Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(color: text, fontWeight: FontWeight.w800, fontSize: 16)),
+                    Text(project.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: GoogleFonts.inter(color: text, fontWeight: FontWeight.w800, fontSize: 17)),
                     const SizedBox(height: 4),
                     Text(project.type.name.toUpperCase() + '  •  ' + date, style: GoogleFonts.inter(color: muted, fontSize: 11.5)),
                     if (project.platforms != null && project.platforms!.isNotEmpty) ...[
@@ -364,14 +364,13 @@ class _HomePageState extends ConsumerState<HomePage> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF16D8), Color(0xFF9B00FF), Color(0xFF4F46FF)],
-            ),
+            color: const Color(0xFFE38A8F),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFFF16D8).withValues(alpha: .24),
-                blurRadius: 24,
+                color: const Color(0xFFE38A8F).withValues(alpha: .22),
+                blurRadius: 18,
+                offset: const Offset(0, 7),
               ),
             ],
           ),

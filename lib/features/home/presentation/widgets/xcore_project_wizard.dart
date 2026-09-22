@@ -647,33 +647,113 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _createButton() => SizedBox(
-    width: double.infinity, height: 68,
-    child: ElevatedButton(
-      onPressed: busy ? null : save,
-      style: ElevatedButton.styleFrom(
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        shadowColor: Colors.transparent,
-        padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      ),
-      child: Ink(
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(colors: [pink, purple, blue]),
-          borderRadius: BorderRadius.circular(19),
-          boxShadow: [BoxShadow(color: pink.withValues(alpha: .22), blurRadius: 24)],
+    width: double.infinity,
+    height: 72,
+    child: DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(21),
+        gradient: const LinearGradient(
+          colors: [pink, Color(0xFFB42BFF), blue],
+          begin: Alignment.centerLeft,
+          end: Alignment.centerRight,
         ),
-        child: Center(
-          child: busy
-            ? const SizedBox(width: 22, height: 22, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-            : Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                const Icon(LucideIcons.sparkles, size: 21),
-                const SizedBox(width: 10),
-                Text(widget.project == null ? 'Create Project' : 'Save Changes',
-                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w900)),
-                const SizedBox(width: 9),
-                const Icon(LucideIcons.arrow_right, size: 21),
-              ]),
+        boxShadow: [
+          BoxShadow(
+            color: pink.withValues(alpha: .22),
+            blurRadius: 26,
+            spreadRadius: -6,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(1.3),
+        child: Material(
+          color: Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+          child: InkWell(
+            onTap: busy ? null : save,
+            borderRadius: BorderRadius.circular(20),
+            child: Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                gradient: const LinearGradient(
+                  colors: [Color(0xFFFF20D9), Color(0xFFA735FF), Color(0xFF4165FF)],
+                ),
+              ),
+              child: busy
+                  ? const Center(
+                      child: SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.2,
+                          color: Colors.white,
+                        ),
+                      ),
+                    )
+                  : Row(
+                      children: [
+                        const SizedBox(width: 18),
+                        Container(
+                          width: 42,
+                          height: 42,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: .13),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: .28),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.white.withValues(alpha: .10),
+                                blurRadius: 10,
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            LucideIcons.sparkles,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            widget.project == null ? 'Create Project' : 'Save Changes',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.inter(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: -.2,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          width: 42,
+                          height: 42,
+                          margin: const EdgeInsets.only(right: 13),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: .13),
+                            shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: .22),
+                              width: 1,
+                            ),
+                          ),
+                          child: const Icon(
+                            LucideIcons.arrow_right,
+                            color: Colors.white,
+                            size: 22,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
         ),
       ),
     ),

@@ -355,6 +355,39 @@ class _HomePageState extends ConsumerState<HomePage> {
       ),
     );
   }
+  Widget _xcoreCreateButton(BuildContext context, VoidCallback onTap) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(18),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFFFF16D8), Color(0xFF9B00FF), Color(0xFF4F46FF)],
+            ),
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFFFF16D8).withValues(alpha: .24),
+                blurRadius: 24,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(LucideIcons.plus, color: Colors.white, size: 22),
+              const SizedBox(width: 10),
+              Text('Create Project', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildDesktopHome(BuildContext context, List<Project> projects, Project? lastProject, List<Project> otherProjects) {
     final theme = Theme.of(context);
     final stats = ref.watch(systemStatsProvider);

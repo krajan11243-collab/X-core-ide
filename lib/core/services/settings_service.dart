@@ -117,6 +117,7 @@ class SettingsService extends StateNotifier<SettingsState> {
   }
 
   static const _keyTheme = 'settings_theme';
+  static const _keyXCoreDarkDefault = 'xcore_dark_default_v1';
   static const _keyFontSize = 'settings_font_size';
   static const _keyAutoCompletion = 'settings_auto_completion';
   static const _keyAiAutoCompletion = 'settings_ai_auto_completion';
@@ -142,6 +143,12 @@ class SettingsService extends StateNotifier<SettingsState> {
 
   Future<void> _loadSettings() async {
     final prefs = await SharedPreferences.getInstance();
+    // X-core opens in dark mode by default. The user can still choose light mode
+    // later; that choice is persisted normally.
+    if (!prefs.containsKey(_keyXCoreDarkDefault)) {
+      await prefs.setInt(_keyTheme, ThemeMode.dark.index);
+      await prefs.setBool(_keyXCoreDarkDefault, true);
+    }
     state = SettingsState(
       themeMode: ThemeMode.values[prefs.getInt(_keyTheme) ?? ThemeMode.dark.index],
       fontSize: prefs.getDouble(_keyFontSize) ?? 14.0,

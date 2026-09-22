@@ -161,7 +161,7 @@ class _XCoreTechLogoPainter extends CustomPainter {
           final a = i * 3.1415926535 / 4;
           canvas.drawLine(
             Offset(c.dx + 11 * s * math.cos(a), c.dy + 11 * s * math.sin(a)),
-            Offset(c.dx + 14 * s * _cos(a), c.dy + 14 * s * _sin(a)),
+            Offset(c.dx + 14 * s * math.cos(a), c.dy + 14 * s * math.sin(a)),
             stroke,
           );
         }

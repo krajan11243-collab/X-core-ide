@@ -778,6 +778,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
       ),
     ),
   );
+}
 
 class _WizardBackdropPainter extends CustomPainter {
   const _WizardBackdropPainter();

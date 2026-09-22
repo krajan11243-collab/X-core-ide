@@ -104,7 +104,7 @@ class _XCoreTechLogoPainter extends CustomPainter {
         final path = Path();
         for (int i = 0; i < 6; i++) {
           final a = -3.1415926535 / 2 + i * 3.1415926535 / 3;
-          final pt = Offset(c.dx + 13 * s * (math.cos(a), c.dy + 13 * s * math.sin(a));
+          final pt = Offset(c.dx + 13 * s * math.cos(a), c.dy + 13 * s * math.sin(a));
           if (i == 0) {
             path.moveTo(pt.dx, pt.dy);
           } else {
@@ -123,16 +123,16 @@ class _XCoreTechLogoPainter extends CustomPainter {
       case XCoreTechLogo.web:
         canvas.drawCircle(c, 12 * s, stroke);
         canvas.drawOval(Rect.fromCenter(center: c, width: 11 * s, height: 24 * s), stroke);
-        canvas.drawLine(4 * s, c.dy, 28 * s, c.dy, stroke);
+        canvas.drawLine(Offset(4 * s, c.dy), Offset(28 * s, c.dy), stroke);
         break;
 
       case XCoreTechLogo.androidJava:
         canvas.drawArc(Rect.fromLTWH(7 * s, 14 * s, 18 * s, 12 * s), 3.1415926535, 3.1415926535, true, p);
         canvas.drawRect(Rect.fromLTWH(7 * s, 19 * s, 18 * s, 7 * s), p);
-        canvas.drawLine(11 * s, 12 * s, 8 * s, 8 * s, stroke);
-        canvas.drawLine(21 * s, 12 * s, 24 * s, 8 * s, stroke);
-        canvas.drawCircle(12 * s, 18 * s, 1.2 * s, Paint()..color = Colors.white);
-        canvas.drawCircle(20 * s, 18 * s, 1.2 * s, Paint()..color = Colors.white);
+        canvas.drawLine(Offset(11 * s, 12 * s), Offset(8 * s, 8 * s), stroke);
+        canvas.drawLine(Offset(21 * s, 12 * s), Offset(24 * s, 8 * s), stroke);
+        canvas.drawCircle(Offset(12 * s, 18 * s), 1.2 * s, Paint()..color = Colors.white);
+        canvas.drawCircle(Offset(20 * s, 18 * s), 1.2 * s, Paint()..color = Colors.white);
         break;
 
       case XCoreTechLogo.androidKotlin:
@@ -160,13 +160,13 @@ class _XCoreTechLogoPainter extends CustomPainter {
         for (int i = 0; i < 8; i++) {
           final a = i * 3.1415926535 / 4;
           canvas.drawLine(
-            Offset(c.dx + 11 * s * _cos(a), c.dy + 11 * s * _sin(a)),
+            Offset(c.dx + 11 * s * math.cos(a), c.dy + 11 * s * math.sin(a)),
             Offset(c.dx + 14 * s * _cos(a), c.dy + 14 * s * _sin(a)),
             stroke,
           );
         }
         canvas.drawCircle(c, 4 * s, stroke);
-        canvas.drawLine(10 * s, c.dy, 22 * s, c.dy, stroke);
+        canvas.drawLine(Offset(10 * s, c.dy), Offset(22 * s, c.dy), stroke);
         break;
     }
   }

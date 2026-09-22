@@ -122,63 +122,69 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
   @override
   Widget build(BuildContext context) {
-    final bottom = MediaQuery.of(context).viewInsets.bottom;
+    final mq = MediaQuery.of(context);
+    final w = mq.size.width;
+    final bottom = mq.viewInsets.bottom;
+    final s = (w / 344.0).clamp(0.88, 1.16);
+
     return Material(
       color: bg,
       child: Stack(
         children: [
-          const Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _WizardBackdropPainter()))),
+          const Positioned.fill(
+            child: IgnorePointer(child: CustomPaint(painter: _WizardBackdropPainter())),
+          ),
           SafeArea(
             top: true,
             bottom: false,
             child: Column(
               children: [
-                _header(),
+                _header(s),
                 Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                padding: EdgeInsets.fromLTRB(27, 8, 27, bottom + 28),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _projectName(),
-                    const SizedBox(height: 16),
-                    _section(LucideIcons.layout_grid, 'PROJECT TYPE', 'Choose your technology'),
-                    const SizedBox(height: 8),
-                    _typeGrid(),
-                    if (type == ProjectType.flutter) ...[
-                      const SizedBox(height: 20),
-                      _section(LucideIcons.cpu, 'ANDROID COMPILE SDK VERSION', 'Android build setting'),
-                      const SizedBox(height: 10),
-                      _sdkField(),
-                      const SizedBox(height: 20),
-                      _section(LucideIcons.monitor, 'TARGET DEVICES / PLATFORMS', 'Select target platforms'),
-                      const SizedBox(height: 10),
-                      _platformGrid(),
-                    ],
-                    if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) ...[
-                      const SizedBox(height: 20),
-                      _section(LucideIcons.code, 'PACKAGE NAME (APPLICATION ID)', 'Android package'),
-                      const SizedBox(height: 10),
-                      _inputField('Package Name', 'com.example.myapp', LucideIcons.code),
-                    ],
-                    const SizedBox(height: 20),
-                    _section(LucideIcons.palette, 'ACCENT COLOR', 'Choose theme color'),
-                    const SizedBox(height: 10),
-                    _colorRow(),
-                    const SizedBox(height: 20),
-                    _section(LucideIcons.image, 'PROJECT ICON', 'Choose app icon'),
-                    const SizedBox(height: 10),
-                    _iconRow(),
-                    if (error != null) ...[
-                      const SizedBox(height: 14),
-                      _errorBox(),
-                    ],
-                    const SizedBox(height: 24),
-                    _createButton(),
-                  ],
-                ),
-              ),
+                  child: SingleChildScrollView(
+                    physics: const BouncingScrollPhysics(),
+                    padding: EdgeInsets.fromLTRB(18 * s, 6 * s, 18 * s, bottom + 18 * s),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        _projectName(s),
+                        SizedBox(height: 16 * s),
+                        _section(LucideIcons.layout_grid, 'PROJECT TYPE', 'Choose your technology', s),
+                        SizedBox(height: 7 * s),
+                        _typeGrid(s),
+                        if (type == ProjectType.flutter) ...[
+                          SizedBox(height: 18 * s),
+                          _section(LucideIcons.cpu, 'ANDROID compileSdk VERSION', 'Android build setting', s),
+                          SizedBox(height: 8 * s),
+                          _sdkField(s),
+                          SizedBox(height: 18 * s),
+                          _section(LucideIcons.monitor, 'TARGET DEVICES / PLATFORMS', 'Select target platforms', s),
+                          SizedBox(height: 8 * s),
+                          _platformGrid(s),
+                        ],
+                        if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) ...[
+                          SizedBox(height: 18 * s),
+                          _section(LucideIcons.code, 'PACKAGE NAME (APPLICATION ID)', 'Android package', s),
+                          SizedBox(height: 8 * s),
+                          _inputField('Package Name', 'com.example.myapp', LucideIcons.code),
+                        ],
+                        SizedBox(height: 18 * s),
+                        _section(LucideIcons.palette, 'Accent Color', 'Choose theme color', s),
+                        SizedBox(height: 8 * s),
+                        _colorRow(s),
+                        SizedBox(height: 18 * s),
+                        _section(LucideIcons.image, 'Project Icon', 'Choose app icon', s),
+                        SizedBox(height: 8 * s),
+                        _iconRow(s),
+                        if (error != null) ...[
+                          SizedBox(height: 10 * s),
+                          _errorBox(),
+                        ],
+                        SizedBox(height: 18 * s),
+                        _createButton(s),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -188,8 +194,8 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     );
   }
 
-  Widget _header() => Padding(
-    padding: const EdgeInsets.fromLTRB(37, 18, 36, 8),
+  Widget _header(double s) => Padding(
+    padding: EdgeInsets.fromLTRB(18 * s, 12 * s, 18 * s, 7 * s),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -197,79 +203,101 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text.rich(TextSpan(children: [
-                TextSpan(text: 'Create ', style: GoogleFonts.inter(
-                  fontSize: 47, fontWeight: FontWeight.w900, color: Colors.white,
-                )),
-                TextSpan(text: 'Project', style: GoogleFonts.inter(
-                  fontSize: 45, fontWeight: FontWeight.w900, color: pink,
-                )),
-              ])),
-              const SizedBox(height: 2),
-              Text('Start building something amazing',
-                style: GoogleFonts.inter(color: muted, fontSize: 19)),
+              FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: Text.rich(TextSpan(children: [
+                  TextSpan(text: 'Create ', style: GoogleFonts.inter(
+                    fontSize: 25 * s, fontWeight: FontWeight.w900, color: Colors.white,
+                    letterSpacing: -.8,
+                  )),
+                  TextSpan(text: 'Project', style: GoogleFonts.inter(
+                    fontSize: 25 * s, fontWeight: FontWeight.w900, color: pink,
+                    letterSpacing: -.8,
+                  )),
+                ])),
+              ),
+              SizedBox(height: 1 * s),
+              Text(
+                'Start building something amazing',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: GoogleFonts.inter(color: muted, fontSize: 10.5 * s, fontWeight: FontWeight.w500),
+              ),
             ],
           ),
         ),
-        _closeButton(),
+        SizedBox(width: 10 * s),
+        _closeButton(s),
       ],
     ),
   );
 
-  Widget _closeButton() => InkWell(
-    onTap: () => Navigator.pop(context),
-    borderRadius: BorderRadius.circular(16),
-    child: Container(
-      width: 62, height: 62,
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .035),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.white.withValues(alpha: .10)),
+  Widget _closeButton(double s) => Material(
+    color: Colors.transparent,
+    child: InkWell(
+      onTap: () => Navigator.pop(context),
+      borderRadius: BorderRadius.circular(15 * s),
+      child: Container(
+        width: 32 * s,
+        height: 32 * s,
+        decoration: BoxDecoration(
+          color: const Color(0xFF111624).withValues(alpha: .78),
+          borderRadius: BorderRadius.circular(15 * s),
+          border: Border.all(color: Colors.white.withValues(alpha: .16)),
+          boxShadow: [BoxShadow(color: purple.withValues(alpha: .10), blurRadius: 12)],
+        ),
+        child: Icon(LucideIcons.x, color: const Color(0xFFE7C8FF), size: 18 * s),
       ),
-      child: const Icon(LucideIcons.x, color: Colors.white, size: 31),
     ),
   );
 
-  Widget _projectName() => Container(
-    padding: const EdgeInsets.fromLTRB(20, 18, 20, 18),
+  Widget _projectName(double s) => Container(
+    height: 62 * s,
+    padding: EdgeInsets.symmetric(horizontal: 9 * s, vertical: 8 * s),
     decoration: BoxDecoration(
-      color: panel,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: cyan.withValues(alpha: .18)),
-      boxShadow: [BoxShadow(color: purple.withValues(alpha: .05), blurRadius: 18)],
+      color: const Color(0xFF0B0F1B).withValues(alpha: .92),
+      borderRadius: BorderRadius.circular(15 * s),
+      border: Border.all(color: const Color(0xFF647089).withValues(alpha: .38)),
+      boxShadow: [BoxShadow(color: purple.withValues(alpha: .045), blurRadius: 14)],
     ),
     child: Row(children: [
       Container(
-        width: 78, height: 78,
+        width: 39 * s,
+        height: 46 * s,
         decoration: BoxDecoration(
           color: purple.withValues(alpha: .10),
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(10 * s),
           border: Border.all(color: purple.withValues(alpha: .28)),
         ),
-        child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 27),
+        child: Icon(LucideIcons.box, color: const Color(0xFFB96DFF), size: 21 * s),
       ),
-      const SizedBox(width: 18),
+      SizedBox(width: 9 * s),
       Expanded(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Project Name', style: GoogleFonts.inter(color: const Color(0xFFB4A9C9), fontSize: 17, fontWeight: FontWeight.w500)),
-            const SizedBox(height: 7),
+            Text(
+              'Project Name',
+              style: GoogleFonts.inter(color: const Color(0xFFB9B1CA), fontSize: 9.5 * s, fontWeight: FontWeight.w500),
+            ),
+            SizedBox(height: 3 * s),
             Container(
-              height: 64,
-              padding: const EdgeInsets.symmetric(horizontal: 18),
+              height: 32 * s,
+              padding: EdgeInsets.symmetric(horizontal: 9 * s),
               decoration: BoxDecoration(
                 color: field,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.white.withValues(alpha: .08)),
+                borderRadius: BorderRadius.circular(9 * s),
+                border: Border.all(color: Colors.white.withValues(alpha: .075)),
               ),
               alignment: Alignment.centerLeft,
               child: TextField(
                 controller: nameCtrl,
-                style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                style: GoogleFonts.inter(color: Colors.white, fontSize: 9.5 * s, fontWeight: FontWeight.w500),
                 decoration: InputDecoration(
                   hintText: 'Project Name',
-                  hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .58), fontSize: 18),
+                  hintStyle: GoogleFonts.inter(color: muted.withValues(alpha: .64), fontSize: 9.5 * s),
                   border: InputBorder.none,
                   isDense: true,
                   contentPadding: EdgeInsets.zero,
@@ -281,6 +309,403 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
       ),
     ]),
   );
+
+  Widget _section(IconData icon, String title, String hint, double s) => SizedBox(
+    height: 25 * s,
+    child: Row(
+      children: [
+        Icon(icon, color: const Color(0xFFA879FF), size: 17 * s),
+        SizedBox(width: 8 * s),
+        Expanded(
+          child: Text(
+            title,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: GoogleFonts.inter(color: const Color(0xFFE7E6EF), fontSize: 10.5 * s, fontWeight: FontWeight.w900),
+          ),
+        ),
+        SizedBox(width: 6 * s),
+        Flexible(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(width: 5 * s, height: 5 * s, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
+              SizedBox(width: 5 * s),
+              Flexible(
+                child: Text(
+                  hint,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.right,
+                  style: GoogleFonts.inter(color: muted, fontSize: 6.5 * s, fontWeight: FontWeight.w500),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+
+  Widget _typeGrid(double s) => LayoutBuilder(builder: (context, constraints) {
+    final gap = 6.5 * s;
+    final unit = (constraints.maxWidth - gap * 3) / 4;
+    final items = <Map<String, dynamic>>[
+      {'name':'FLUTTER','type':ProjectType.flutter,'logo':XCoreTechLogo.flutter,'color':pink},
+      {'name':'PYTHON','type':ProjectType.python,'logo':XCoreTechLogo.python,'color':const Color(0xFFFFD43B)},
+      {'name':'NODEJS','type':ProjectType.nodejs,'logo':XCoreTechLogo.nodejs,'color':const Color(0xFF68A063)},
+      {'name':'WEB','type':ProjectType.web,'logo':XCoreTechLogo.web,'color':const Color(0xFF4F7CFF)},
+      {'name':'ANDROID JAVA','type':ProjectType.androidJava,'logo':XCoreTechLogo.androidJava,'color':const Color(0xFF75DF42)},
+      {'name':'ANDROID KOTLIN','type':ProjectType.androidKotlin,'logo':XCoreTechLogo.androidKotlin,'color':const Color(0xFF9C55FF)},
+      {'name':'RUST','type':ProjectType.rust,'logo':XCoreTechLogo.rust,'color':const Color(0xFFFF8A4C)},
+    ];
+
+    Widget card(Map<String, dynamic> item, double width) {
+      final selected = type == item['type'];
+      final color = item['color'] as Color;
+      return SizedBox(
+        width: width,
+        height: 36 * s,
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            onTap: () => setState(() {
+              type = item['type'] as ProjectType;
+              if (type == ProjectType.flutter) sdkCtrl.text = '34';
+              if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) {
+                sdkCtrl.text = 'com.example.app';
+              }
+            }),
+            borderRadius: BorderRadius.circular(10 * s),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 140),
+              padding: EdgeInsets.symmetric(horizontal: 6 * s),
+              decoration: BoxDecoration(
+                color: selected ? color.withValues(alpha: .11) : panel,
+                borderRadius: BorderRadius.circular(10 * s),
+                border: Border.all(
+                  color: selected ? color : const Color(0xFF4B5368).withValues(alpha: .50),
+                  width: selected ? 1.25 * s : .75 * s,
+                ),
+                boxShadow: selected ? [BoxShadow(color: color.withValues(alpha: .25), blurRadius: 11, spreadRadius: -4)] : null,
+              ),
+              child: Stack(
+                children: [
+                  Row(
+                    children: [
+                      XCoreTechIcon(
+                        logo: item['logo'] as XCoreTechLogo,
+                        color: selected ? color : Colors.white70,
+                        size: 18 * s,
+                      ),
+                      SizedBox(width: 5 * s),
+                      Expanded(
+                        child: Text(
+                          item['name'] as String,
+                          maxLines: 1,
+                          softWrap: false,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.inter(
+                            color: selected ? Colors.white : Colors.white70,
+                            fontSize: 7.2 * s,
+                            fontWeight: FontWeight.w900,
+                            letterSpacing: -.05,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  if (selected)
+                    Positioned(
+                      right: -1 * s,
+                      top: -1 * s,
+                      child: Container(
+                        width: 12 * s,
+                        height: 12 * s,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: const Color(0xFF181022),
+                          border: Border.all(color: color, width: .8 * s),
+                        ),
+                        child: Icon(LucideIcons.check, color: color, size: 7 * s),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      children: [
+        Row(children: [
+          for (int i = 0; i < 4; i++) ...[
+            card(items[i], unit),
+            if (i < 3) SizedBox(width: gap),
+          ],
+        ]),
+        SizedBox(height: gap),
+        Row(children: [
+          Expanded(flex: 3, child: card(items[4], double.infinity)),
+          SizedBox(width: gap),
+          Expanded(flex: 3, child: card(items[5], double.infinity)),
+          SizedBox(width: gap),
+          Expanded(flex: 2, child: card(items[6], double.infinity)),
+        ]),
+      ],
+    );
+  });
+
+  Widget _sdkField(double s) => Container(
+    height: 45 * s,
+    decoration: BoxDecoration(
+      color: field,
+      borderRadius: BorderRadius.circular(12 * s),
+      border: Border.all(color: const Color(0xFF4B5368).withValues(alpha: .42)),
+    ),
+    child: Row(
+      children: [
+        SizedBox(width: 7 * s),
+        Container(
+          width: 33 * s,
+          height: 33 * s,
+          decoration: BoxDecoration(
+            color: const Color(0xFF0D1820),
+            borderRadius: BorderRadius.circular(9 * s),
+          ),
+          child: XCorePlatformIcon(logo: XCorePlatformLogo.android, color: const Color(0xFF7CEB42), size: 20 * s),
+        ),
+        SizedBox(width: 7 * s),
+        Expanded(
+          child: TextField(
+            controller: sdkCtrl,
+            keyboardType: TextInputType.number,
+            style: GoogleFonts.inter(color: Colors.white, fontSize: 10 * s, fontWeight: FontWeight.w600),
+            decoration: const InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.zero,
+            ),
+          ),
+        ),
+        Container(
+          width: 27 * s,
+          height: 29 * s,
+          margin: EdgeInsets.only(right: 7 * s),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: .055),
+            borderRadius: BorderRadius.circular(9 * s),
+          ),
+          child: Icon(LucideIcons.chevrons_up_down, color: Colors.white70, size: 15 * s),
+        ),
+      ],
+    ),
+  );
+
+  Widget _platformGrid(double s) => LayoutBuilder(builder: (context, constraints) {
+    final gap = 6.5 * s;
+    final width = (constraints.maxWidth - gap * 2) / 3;
+    final data = <Map<String, dynamic>>[
+      {'name':'ANDROID','key':'android','logo':XCorePlatformLogo.android},
+      {'name':'IOS','key':'ios','logo':XCorePlatformLogo.apple},
+      {'name':'WEB','key':'web','logo':XCorePlatformLogo.web},
+      {'name':'WINDOWS','key':'windows','logo':XCorePlatformLogo.windows},
+      {'name':'MACOS','key':'macos','logo':XCorePlatformLogo.apple},
+      {'name':'LINUX','key':'linux','logo':XCorePlatformLogo.linux},
+    ];
+
+    return Wrap(
+      spacing: gap,
+      runSpacing: gap,
+      children: data.map((item) {
+        final key = item['key'] as String;
+        final selected = platforms.contains(key);
+        return SizedBox(
+          width: width,
+          height: 34 * s,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () => setState(() {
+                if (!selected) {
+                  platforms.add(key);
+                } else if (platforms.length > 1) {
+                  platforms.remove(key);
+                }
+              }),
+              borderRadius: BorderRadius.circular(10 * s),
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 140),
+                decoration: BoxDecoration(
+                  color: selected ? pink.withValues(alpha: .09) : panel,
+                  borderRadius: BorderRadius.circular(10 * s),
+                  border: Border.all(
+                    color: selected ? pink : const Color(0xFF4B5368).withValues(alpha: .48),
+                    width: selected ? 1.25 * s : .75 * s,
+                  ),
+                  boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 11, spreadRadius: -4)] : null,
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    XCorePlatformIcon(
+                      logo: item['logo'] as XCorePlatformLogo,
+                      color: selected ? pink : Colors.white70,
+                      size: 16 * s,
+                    ),
+                    SizedBox(width: 5 * s),
+                    Flexible(
+                      child: Text(
+                        item['name'] as String,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: GoogleFonts.inter(
+                          color: selected ? Colors.white : Colors.white70,
+                          fontSize: 7.8 * s,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    if (selected) ...[
+                      SizedBox(width: 2 * s),
+                      Icon(LucideIcons.check, color: pink, size: 7 * s),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
+    );
+  });
+
+  Widget _colorRow(double s) => LayoutBuilder(builder: (context, constraints) {
+    final gap = 6 * s;
+    final width = (constraints.maxWidth - gap * 5) / 6;
+    final shown = colors.take(5).toList();
+    return Row(
+      children: [
+        _colorChoice(null, width, s),
+        ...shown.map((c) => Padding(
+          padding: EdgeInsets.only(left: gap),
+          child: _colorChoice(c, width, s),
+        )),
+      ],
+    );
+  });
+
+  Widget _colorChoice(Color? c, double width, double s) {
+    final selected = c == null ? colorValue == null : colorValue == c.toARGB32();
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() => colorValue = c?.toARGB32()),
+        borderRadius: BorderRadius.circular(11 * s),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          width: width,
+          height: 48 * s,
+          decoration: BoxDecoration(
+            color: panel,
+            borderRadius: BorderRadius.circular(11 * s),
+            border: Border.all(
+              color: selected ? pink : const Color(0xFF4B5368).withValues(alpha: .45),
+              width: selected ? 1.4 * s : .75 * s,
+            ),
+            boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .17), blurRadius: 12)] : null,
+          ),
+          child: Center(
+            child: c == null
+                ? Container(
+                    width: 27 * s,
+                    height: 27 * s,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: field,
+                      border: Border.all(color: purple, width: 1.4 * s),
+                    ),
+                    child: Icon(LucideIcons.ban, color: const Color(0xFFCA8CFF), size: 14 * s),
+                  )
+                : Container(
+                    width: 27 * s,
+                    height: 27 * s,
+                    decoration: BoxDecoration(shape: BoxShape.circle, color: c),
+                  ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _iconRow(double s) => LayoutBuilder(builder: (context, constraints) {
+    final gap = 6 * s;
+    final width = (constraints.maxWidth - gap * 5) / 6;
+    final shown = icons.take(5).toList();
+    return Row(
+      children: [
+        _iconChoice(null, width, s),
+        ...shown.map((icon) => Padding(
+          padding: EdgeInsets.only(left: gap),
+          child: _iconChoice(icon, width, s),
+        )),
+      ],
+    );
+  });
+
+  Widget _iconChoice(IconData? icon, double width, double s) {
+    final selected = icon == null ? iconCodePoint == null : iconCodePoint == icon.codePoint;
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => setState(() {
+          if (icon == null) {
+            iconCodePoint = null;
+            iconFontFamily = null;
+            iconFontPackage = null;
+          } else {
+            iconCodePoint = icon.codePoint;
+            iconFontFamily = icon.fontFamily;
+            iconFontPackage = icon.fontPackage;
+          }
+        }),
+        borderRadius: BorderRadius.circular(11 * s),
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 140),
+          width: width,
+          height: 48 * s,
+          decoration: BoxDecoration(
+            color: selected ? pink.withValues(alpha: .075) : panel,
+            borderRadius: BorderRadius.circular(11 * s),
+            border: Border.all(
+              color: selected ? pink : const Color(0xFF4B5368).withValues(alpha: .45),
+              width: selected ? 1.4 * s : .75 * s,
+            ),
+            boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .17), blurRadius: 12)] : null,
+          ),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Icon(icon ?? LucideIcons.ban, color: selected ? pink : Colors.white70, size: 17 * s),
+              if (selected)
+                Positioned(
+                  right: 3 * s,
+                  top: 3 * s,
+                  child: Container(
+                    width: 10 * s,
+                    height: 10 * s,
+                    decoration: const BoxDecoration(shape: BoxShape.circle, color: pink),
+                    child: Icon(LucideIcons.check, color: Colors.white, size: 6 * s),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _inputField(String label, String hint, IconData icon, {bool number = false}) => TextField(
     controller: sdkCtrl,
     keyboardType: number ? TextInputType.number : TextInputType.text,
@@ -299,472 +724,60 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     ),
   );
 
-  Widget _sdkField() => Container(
-    height: 90,
-    decoration: BoxDecoration(
-      color: field,
-      borderRadius: BorderRadius.circular(24),
-      border: Border.all(color: Colors.white.withValues(alpha: .10)),
-    ),
-    child: Row(
-      children: [
-        const SizedBox(width: 18),
-        Container(
-          width: 54,
-          height: 54,
-          decoration: BoxDecoration(
-            color: pink.withValues(alpha: .08),
-            borderRadius: BorderRadius.circular(15),
-          ),
-          child: const Icon(LucideIcons.cpu, color: pink, size: 31),
-        ),
-        const SizedBox(width: 18),
-        Expanded(
-          child: TextField(
-            controller: sdkCtrl,
-            keyboardType: TextInputType.number,
-            style: GoogleFonts.inter(color: Colors.white, fontSize: 21, fontWeight: FontWeight.w600),
-            decoration: InputDecoration(
-              labelText: 'Compile SDK',
-              labelStyle: GoogleFonts.inter(color: muted, fontSize: 17),
-              border: InputBorder.none,
-              contentPadding: const EdgeInsets.only(bottom: 1),
-            ),
-          ),
-        ),
-        const SizedBox(width: 18),
-      ],
-    ),
-  );
-
-  Widget _section(IconData icon, String title, String hint) => Row(
-    children: [
-      Container(
-        width: 58, height: 58,
-        decoration: BoxDecoration(
-          color: purple.withValues(alpha: .10),
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: purple.withValues(alpha: .28)),
-        ),
-        child: Icon(icon, color: purple, size: 27),
-      ),
-      const SizedBox(width: 9),
-      Expanded(
-        child: Text(title,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: GoogleFonts.inter(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900)),
-      ),
-      const SizedBox(width: 7),
-      Flexible(
-        flex: 0,
-        child: Row(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 9, height: 9, decoration: const BoxDecoration(shape: BoxShape.circle, color: purple)),
-          const SizedBox(width: 10),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 155),
-            child: Text(hint, maxLines: 1, overflow: TextOverflow.ellipsis,
-              style: GoogleFonts.inter(color: muted, fontSize: 13.5, fontWeight: FontWeight.w500)),
-          ),
-        ]),
-      ),
-    ],
-  );
-
-  Widget _typeGrid() => LayoutBuilder(builder: (context, constraints) {
-    const gap = 12.0;
-    final unit = (constraints.maxWidth - gap * 3) / 4;
-
-    final items = <Map<String, dynamic>>[
-      {'name':'FLUTTER','type':ProjectType.flutter,'logo':XCoreTechLogo.flutter,'color':cyan},
-      {'name':'PYTHON','type':ProjectType.python,'logo':XCoreTechLogo.python,'color':const Color(0xFFFFD43B)},
-      {'name':'NODEJS','type':ProjectType.nodejs,'logo':XCoreTechLogo.nodejs,'color':const Color(0xFF68A063)},
-      {'name':'WEB','type':ProjectType.web,'logo':XCoreTechLogo.web,'color':const Color(0xFF4F7CFF)},
-      {'name':'ANDROID JAVA','type':ProjectType.androidJava,'logo':XCoreTechLogo.androidJava,'color':const Color(0xFF72DE4A)},
-      {'name':'ANDROID KOTLIN','type':ProjectType.androidKotlin,'logo':XCoreTechLogo.androidKotlin,'color':const Color(0xFF8B5CF6)},
-      {'name':'RUST','type':ProjectType.rust,'logo':XCoreTechLogo.rust,'color':const Color(0xFFFF8A4C)},
-    ];
-
-    Widget card(Map<String, dynamic> item, {required double width}) {
-      final selected = type == item['type'];
-      final color = item['color'] as Color;
-      final logo = item['logo'] as XCoreTechLogo;
-
-      return SizedBox(
-        width: width,
-        height: 72,
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            onTap: () => setState(() {
-              type = item['type'] as ProjectType;
-              if (type == ProjectType.flutter) sdkCtrl.text = '34';
-              if (type == ProjectType.androidJava || type == ProjectType.androidKotlin) {
-                sdkCtrl.text = 'com.example.app';
-              }
-            }),
-            borderRadius: BorderRadius.circular(14),
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 150),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                color: selected ? color.withValues(alpha: .105) : panel,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: selected ? color : Colors.white.withValues(alpha: .105),
-                  width: selected ? 1.7 : 1.0,
-                ),
-                boxShadow: selected
-                    ? [BoxShadow(color: color.withValues(alpha: .22), blurRadius: 15, spreadRadius: -4)]
-                    : null,
-              ),
-              child: Stack(
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 48,
-                        decoration: BoxDecoration(
-                          color: selected ? color.withValues(alpha: .12) : Colors.white.withValues(alpha: .025),
-                          borderRadius: BorderRadius.circular(13),
-                        ),
-                        alignment: Alignment.center,
-                        child: XCoreTechIcon(
-                          logo: logo,
-                          color: selected ? color : Colors.white70,
-                          size: 31,
-                        ),
-                      ),
-                      const SizedBox(width: 5),
-                      Expanded(
-                        child: Padding(
-                          padding: const EdgeInsets.only(right: 2),
-                          child: Text(
-                            item['name'] as String,
-                            maxLines: 1,
-                            softWrap: false,
-                            overflow: TextOverflow.clip,
-                            style: GoogleFonts.inter(
-                              color: selected ? Colors.white : Colors.white70,
-                              fontSize: 11.5,
-                              fontWeight: FontWeight.w900,
-                              letterSpacing: .01,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  if (selected)
-                    Positioned(
-                      right: -1,
-                      top: -1,
-                      child: Container(
-                        width: 20,
-                        height: 20,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: panel,
-                          border: Border.all(color: color, width: 1.2),
-                        ),
-                        child: Icon(LucideIcons.check, color: color, size: 11),
-                      ),
-                    ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      );
-    }
-
-    return Column(
-      children: [
-        Row(
-          children: [
-            for (int i = 0; i < 4; i++) ...[
-              card(items[i], width: unit),
-              if (i < 3) const SizedBox(width: gap),
-            ],
-          ],
-        ),
-        const SizedBox(height: gap),
-        Row(
-          children: [
-            Expanded(flex: 3, child: card(items[4], width: double.infinity)),
-            const SizedBox(width: gap),
-            Expanded(flex: 3, child: card(items[5], width: double.infinity)),
-            const SizedBox(width: gap),
-            Expanded(flex: 2, child: card(items[6], width: double.infinity)),
-          ],
-        ),
-      ],
-    );
-  });
-  Widget _platformGrid() => LayoutBuilder(builder: (context, constraints) {
-    const gap = 8.0;
-    final width = (constraints.maxWidth - gap * 2) / 3;
-
-    final data = <Map<String, dynamic>>[
-      {'name':'ANDROID','key':'android','logo':XCorePlatformLogo.android},
-      {'name':'IOS','key':'ios','logo':XCorePlatformLogo.apple},
-      {'name':'WEB','key':'web','logo':XCorePlatformLogo.web},
-      {'name':'WINDOWS','key':'windows','logo':XCorePlatformLogo.windows},
-      {'name':'MACOS','key':'macos','logo':XCorePlatformLogo.apple},
-      {'name':'LINUX','key':'linux','logo':XCorePlatformLogo.linux},
-    ];
-
-    return Wrap(
-      spacing: gap,
-      runSpacing: gap,
-      children: data.map((item) {
-        final key = item['key'] as String;
-        final selected = platforms.contains(key);
-
-        return SizedBox(
-          width: width,
-          height: 68,
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: () => setState(() {
-                if (!selected) {
-                  platforms.add(key);
-                } else if (platforms.length > 1) {
-                  platforms.remove(key);
-                }
-              }),
-              borderRadius: BorderRadius.circular(14),
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 150),
-                decoration: BoxDecoration(
-                  color: selected ? pink.withValues(alpha: .09) : panel,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: selected ? pink : Colors.white.withValues(alpha: .105),
-                    width: selected ? 1.7 : 1,
-                  ),
-                  boxShadow: selected
-                      ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 15, spreadRadius: -4)]
-                      : null,
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    XCorePlatformIcon(
-                      logo: item['logo'] as XCorePlatformLogo,
-                      color: selected ? pink : Colors.white70,
-                      size: 21,
-                    ),
-                    const SizedBox(width: 10),
-                    Flexible(
-                      child: Text(
-                        item['name'] as String,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.inter(
-                          color: selected ? Colors.white : Colors.white70,
-                          fontSize: 13.5,
-                          fontWeight: FontWeight.w900,
-                        ),
-                      ),
-                    ),
-                    if (selected) ...[
-                      const SizedBox(width: 3),
-                      Icon(LucideIcons.check, color: pink, size: 12),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  });
-  Widget _colorRow() => SizedBox(
-    height: 98,
-    child: ListView.separated(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      itemCount: colors.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(width: 10),
-      itemBuilder: (_, i) => _colorChoice(i == 0 ? null : colors[i - 1]),
-    ),
-  );
-
-  Widget _colorChoice(Color? c) {
-    final selected = c == null ? colorValue == null : colorValue == c.toARGB32();
-    return InkWell(
-      onTap: () => setState(() => colorValue = c?.toARGB32()),
-      borderRadius: BorderRadius.circular(18),
-      child: Container(
-        width: 88,
-        height: 94,
-        decoration: BoxDecoration(
-          color: panel,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(
-            color: selected ? pink : Colors.white.withValues(alpha: .08),
-            width: selected ? 2.5 : 1,
-          ),
-          boxShadow: selected ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 18)] : null,
-        ),
-        child: Center(
-          child: c == null
-              ? Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: field,
-                    border: Border.all(color: pink, width: 2.5),
-                  ),
-                  child: const Icon(LucideIcons.ban, color: pink, size: 27),
-                )
-              : Container(
-                  width: 62,
-                  height: 62,
-                  decoration: BoxDecoration(shape: BoxShape.circle, color: c),
-                  child: selected ? const Icon(LucideIcons.check, color: Colors.white, size: 22) : null,
-                ),
-        ),
-      ),
-    );
-  }
-
-  Widget _iconRow() => SizedBox(
-    height: 98,
-    child: ListView.separated(
-      scrollDirection: Axis.horizontal,
-      physics: const BouncingScrollPhysics(),
-      itemCount: icons.length + 1,
-      separatorBuilder: (_, __) => const SizedBox(width: 10),
-      itemBuilder: (_, i) {
-        final icon = i == 0 ? LucideIcons.ban : icons[i - 1];
-        final selected = i == 0 ? iconCodePoint == null : iconCodePoint == icon.codePoint;
-        return InkWell(
-          onTap: () => setState(() {
-            if (i == 0) {
-              iconCodePoint = null;
-              iconFontFamily = null;
-              iconFontPackage = null;
-            } else {
-              iconCodePoint = icon.codePoint;
-              iconFontFamily = icon.fontFamily;
-              iconFontPackage = icon.fontPackage;
-            }
-          }),
-          borderRadius: BorderRadius.circular(18),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 140),
-            width: 92,
-            height: 94,
-            decoration: BoxDecoration(
-              color: selected ? pink.withValues(alpha: .075) : panel,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(
-                color: selected ? pink : Colors.white.withValues(alpha: .10),
-                width: selected ? 2.5 : 1,
-              ),
-              boxShadow: selected
-                  ? [BoxShadow(color: pink.withValues(alpha: .18), blurRadius: 18)]
-                  : null,
-            ),
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(icon, color: selected ? pink : Colors.white70, size: 34),
-                if (selected)
-                  Positioned(
-                    right: 7,
-                    top: 7,
-                    child: Container(
-                      width: 22,
-                      height: 22,
-                      decoration: const BoxDecoration(shape: BoxShape.circle, color: pink),
-                      child: const Icon(LucideIcons.check, color: Colors.white, size: 13),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-        );
-      },
-    ),
-  );
-
   Widget _errorBox() => Container(
     width: double.infinity,
-    padding: const EdgeInsets.all(12),
+    padding: const EdgeInsets.all(9),
     decoration: BoxDecoration(
       color: Colors.redAccent.withValues(alpha: .08),
-      borderRadius: BorderRadius.circular(14),
+      borderRadius: BorderRadius.circular(10),
       border: Border.all(color: Colors.redAccent.withValues(alpha: .28)),
     ),
-    child: Text(error!, style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 11)),
+    child: Text(error!, style: GoogleFonts.inter(color: Colors.redAccent, fontSize: 9)),
   );
 
-  Widget _createButton() => Padding(
-    padding: const EdgeInsets.symmetric(horizontal: 8),
-    child: SizedBox(
-      width: double.infinity,
-      height: 98,
-      child: Material(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.circular(24),
-        child: Ink(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(24),
-            gradient: const LinearGradient(
-              colors: [Color(0xFFFF16D8), Color(0xFFB02CFF), Color(0xFF3F64FF)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            boxShadow: [
-              BoxShadow(color: Color(0xFFFF16D8), blurRadius: 30, spreadRadius: -9, offset: Offset(0, 9)),
-              BoxShadow(color: Color(0xFF5A52FF), blurRadius: 24, spreadRadius: -12, offset: Offset(8, 5)),
-            ],
+  Widget _createButton(double s) => SizedBox(
+    width: double.infinity,
+    height: 49 * s,
+    child: Material(
+      color: Colors.transparent,
+      borderRadius: BorderRadius.circular(14 * s),
+      child: Ink(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(14 * s),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF18D8), Color(0xFFB02CFF), Color(0xFF3F64FF)],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
           ),
-          child: InkWell(
-            onTap: busy ? null : save,
-            borderRadius: BorderRadius.circular(24),
-            splashColor: Colors.white.withValues(alpha: .14),
-            highlightColor: Colors.white.withValues(alpha: .06),
-            child: Center(
-              child: busy
-                  ? const SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
-                    )
-                  : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(LucideIcons.sparkles, color: Colors.white, size: 30),
-                        const SizedBox(width: 16),
-                        Text(
-                          widget.project == null ? 'Create Project' : 'Save Changes',
-                          style: GoogleFonts.inter(
-                            color: Colors.white,
-                            fontSize: 24,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -.35,
-                          ),
-                        ),
-                        const SizedBox(width: 22),
-                        const Icon(LucideIcons.arrow_right, color: Colors.white, size: 31),
-                      ],
-                    ),
-            ),
+          boxShadow: const [
+            BoxShadow(color: Color(0x55FF18D8), blurRadius: 20, spreadRadius: -6, offset: Offset(0, 6)),
+            BoxShadow(color: Color(0x443F64FF), blurRadius: 18, spreadRadius: -8, offset: Offset(5, 4)),
+          ],
+        ),
+        child: InkWell(
+          onTap: busy ? null : save,
+          borderRadius: BorderRadius.circular(14 * s),
+          child: Center(
+            child: busy
+                ? SizedBox(width: 18 * s, height: 18 * s, child: const CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
+                : Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(LucideIcons.sparkles, color: Colors.white, size: 18 * s),
+                      SizedBox(width: 8 * s),
+                      Text(
+                        widget.project == null ? 'Create Project' : 'Save Changes',
+                        style: GoogleFonts.inter(color: Colors.white, fontSize: 13.5 * s, fontWeight: FontWeight.w900),
+                      ),
+                      SizedBox(width: 11 * s),
+                      Icon(LucideIcons.arrow_right, color: Colors.white, size: 17 * s),
+                    ],
+                  ),
           ),
         ),
       ),
     ),
   );
-}
-
 
 class _WizardBackdropPainter extends CustomPainter {
   const _WizardBackdropPainter();

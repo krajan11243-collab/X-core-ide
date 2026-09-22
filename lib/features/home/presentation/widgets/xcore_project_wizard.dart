@@ -382,46 +382,58 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                     ? [BoxShadow(color: color.withValues(alpha: .22), blurRadius: 15, spreadRadius: -4)]
                     : null,
               ),
-              child: Row(
+              child: Stack(
                 children: [
-                  Container(
-                    width: 34,
-                    height: 34,
-                    decoration: BoxDecoration(
-                      color: selected ? color.withValues(alpha: .12) : Colors.white.withValues(alpha: .025),
-                      borderRadius: BorderRadius.circular(9),
-                    ),
-                    alignment: Alignment.center,
-                    child: XCoreTechIcon(
-                      logo: logo,
-                      color: selected ? color : Colors.white70,
-                      size: 23,
-                    ),
-                  ),
-                  const SizedBox(width: 6),
-                  Expanded(
-                    child: Text(
-                      item['name'] as String,
-                      maxLines: 1,
-                      softWrap: false,
-                      overflow: TextOverflow.clip,
-                      style: GoogleFonts.inter(
-                        color: selected ? Colors.white : Colors.white70,
-                        fontSize: 8.5,
-                        fontWeight: FontWeight.w900,
-                        letterSpacing: .02,
+                  Row(
+                    children: [
+                      Container(
+                        width: 33,
+                        height: 33,
+                        decoration: BoxDecoration(
+                          color: selected ? color.withValues(alpha: .12) : Colors.white.withValues(alpha: .025),
+                          borderRadius: BorderRadius.circular(9),
+                        ),
+                        alignment: Alignment.center,
+                        child: XCoreTechIcon(
+                          logo: logo,
+                          color: selected ? color : Colors.white70,
+                          size: 22,
+                        ),
                       ),
-                    ),
+                      const SizedBox(width: 5),
+                      Expanded(
+                        child: Padding(
+                          padding: const EdgeInsets.only(right: 2),
+                          child: Text(
+                            item['name'] as String,
+                            maxLines: 1,
+                            softWrap: false,
+                            overflow: TextOverflow.clip,
+                            style: GoogleFonts.inter(
+                              color: selected ? Colors.white : Colors.white70,
+                              fontSize: 7.7,
+                              fontWeight: FontWeight.w900,
+                              letterSpacing: .01,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                   if (selected)
-                    Container(
-                      width: 17,
-                      height: 17,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: color, width: 1.2),
+                    Positioned(
+                      right: -1,
+                      top: -1,
+                      child: Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: panel,
+                          border: Border.all(color: color, width: 1.2),
+                        ),
+                        child: Icon(LucideIcons.check, color: color, size: 9),
                       ),
-                      child: Icon(LucideIcons.check, color: color, size: 10),
                     ),
                 ],
               ),
@@ -444,11 +456,11 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         const SizedBox(height: gap),
         Row(
           children: [
-            Expanded(child: card(items[4], width: double.infinity)),
+            Expanded(flex: 3, child: card(items[4], width: double.infinity)),
             const SizedBox(width: gap),
-            Expanded(child: card(items[5], width: double.infinity)),
+            Expanded(flex: 3, child: card(items[5], width: double.infinity)),
             const SizedBox(width: gap),
-            Expanded(flex: 1, child: card(items[6], width: double.infinity)),
+            Expanded(flex: 2, child: card(items[6], width: double.infinity)),
           ],
         ),
       ],

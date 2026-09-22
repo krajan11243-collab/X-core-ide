@@ -1,3 +1,4 @@
+import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_lucide/flutter_lucide.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -18,9 +19,9 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   static const purple = Color(0xFF9B35FF);
   static const blue = Color(0xFF405CFF);
   static const cyan = Color(0xFF00CFFF);
-  static const bg = Color(0xFF05060D);
-  static const panel = Color(0xFF0B0E18);
-  static const field = Color(0xFF0D111D);
+  static const bg = Color(0xFF02030A);
+  static const panel = Color(0xFF090C16);
+  static const field = Color(0xFF0B0E18);
   static const muted = Color(0xFF9298AB);
 
   late final TextEditingController nameCtrl;
@@ -123,13 +124,16 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     final bottom = MediaQuery.of(context).viewInsets.bottom;
     return Material(
       color: bg,
-      child: SafeArea(
-        top: true,
-        bottom: false,
-        child: Column(
-          children: [
-            _header(),
-            Expanded(
+      child: Stack(
+        children: [
+          const Positioned.fill(child: IgnorePointer(child: CustomPaint(painter: _WizardBackdropPainter()))),
+          SafeArea(
+            top: true,
+            bottom: false,
+            child: Column(
+              children: [
+                _header(),
+                Expanded(
               child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
                 padding: EdgeInsets.fromLTRB(20, 10, 20, bottom + 26),
@@ -174,15 +178,17 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                   ],
                 ),
               ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   Widget _header() => Padding(
-    padding: const EdgeInsets.fromLTRB(20, 8, 12, 2),
+    padding: const EdgeInsets.fromLTRB(20, 14, 12, 4),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -192,7 +198,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
             children: [
               Text.rich(TextSpan(children: [
                 TextSpan(text: 'Create ', style: GoogleFonts.inter(
-                  fontSize: 31, fontWeight: FontWeight.w900, color: Colors.white,
+                  fontSize: 34, fontWeight: FontWeight.w900, color: Colors.white,
                 )),
                 TextSpan(text: 'Project', style: GoogleFonts.inter(
                   fontSize: 31, fontWeight: FontWeight.w900, color: pink,
@@ -200,7 +206,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               ])),
               const SizedBox(height: 2),
               Text('Start building something amazing',
-                style: GoogleFonts.inter(color: muted, fontSize: 13.5)),
+                style: GoogleFonts.inter(color: muted, fontSize: 14)),
             ],
           ),
         ),
@@ -213,38 +219,38 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     onTap: () => Navigator.pop(context),
     borderRadius: BorderRadius.circular(16),
     child: Container(
-      width: 48, height: 48,
+      width: 68, height: 68,
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: .035),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.white.withValues(alpha: .10)),
       ),
-      child: const Icon(LucideIcons.x, color: Colors.white, size: 28),
+      child: const Icon(LucideIcons.x, color: Colors.white, size: 31),
     ),
   );
 
   Widget _projectName() => Container(
-    padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+    padding: const EdgeInsets.fromLTRB(16, 16, 18, 16),
     decoration: BoxDecoration(
       color: panel,
-      borderRadius: BorderRadius.circular(20),
-      border: Border.all(color: cyan.withValues(alpha: .13)),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: cyan.withValues(alpha: .18)),
       boxShadow: [BoxShadow(color: purple.withValues(alpha: .07), blurRadius: 18)],
     ),
     child: Row(children: [
       Container(
-        width: 48, height: 48,
+        width: 58, height: 58,
         decoration: BoxDecoration(
-          color: purple.withValues(alpha: .10),
+          color: purple.withValues(alpha: .11),
           borderRadius: BorderRadius.circular(14),
           border: Border.all(color: purple.withValues(alpha: .30)),
         ),
-        child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 24),
+        child: const Icon(LucideIcons.box, color: Color(0xFFB873FF), size: 29),
       ),
-      const SizedBox(width: 12),
+      const SizedBox(width: 15),
       Expanded(child: TextField(
         controller: nameCtrl,
-        style: GoogleFonts.inter(color: Colors.white, fontSize: 15, fontWeight: FontWeight.w600),
+        style: GoogleFonts.inter(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600),
         decoration: InputDecoration(
           labelText: 'Project Name',
           labelStyle: GoogleFonts.inter(color: muted, fontSize: 12),
@@ -314,7 +320,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
 
   Widget _typeGrid() => LayoutBuilder(builder: (context, constraints) {
     const gap = 9.0;
-    final count = constraints.maxWidth >= 570 ? 4 : 2;
+    final count = constraints.maxWidth >= 560 ? 4 : 2;
     final width = (constraints.maxWidth - gap * (count - 1)) / count;
     final items = <Map<String, dynamic>>[
       {'name':'FLUTTER','type':ProjectType.flutter,'icon':LucideIcons.layers,'color':cyan},
@@ -331,7 +337,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         final selected = type == item['type'];
         final color = item['color'] as Color;
         return SizedBox(
-          width: width, height: 58,
+          width: width, height: 70,
           child: InkWell(
             onTap: () => setState(() {
               type = item['type'] as ProjectType;
@@ -340,13 +346,13 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                 sdkCtrl.text = 'com.example.app';
               }
             }),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(17),
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 150),
               padding: const EdgeInsets.symmetric(horizontal: 9),
               decoration: BoxDecoration(
                 color: selected ? color.withValues(alpha: .12) : panel,
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(17),
                 border: Border.all(
                   color: selected ? color : Colors.white.withValues(alpha: .095),
                   width: selected ? 1.7 : 1,
@@ -357,28 +363,28 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               ),
               child: Row(children: [
                 Container(
-                  width: 29, height: 29,
+                  width: 34, height: 34,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: selected ? .12 : .055),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(item['icon'] as IconData,
-                    color: selected ? color : Colors.white70, size: 19),
+                    color: selected ? color : Colors.white70, size: 22),
                 ),
                 const SizedBox(width: 7),
                 Expanded(
                   child: Text(item['name'] as String, maxLines: 1, overflow: TextOverflow.ellipsis,
                     style: GoogleFonts.inter(
                       color: selected ? Colors.white : Colors.white70,
-                      fontSize: 9.4, fontWeight: FontWeight.w900,
+                      fontSize: 10.5, fontWeight: FontWeight.w900,
                       letterSpacing: .1,
                     )),
                 ),
                 if (selected)
                   Container(
-                    width: 17, height: 17,
+                    width: 19, height: 19,
                     decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: color, width: 1.4)),
-                    child: Icon(LucideIcons.check, color: color, size: 11),
+                    child: Icon(LucideIcons.check, color: color, size: 12),
                   ),
               ]),
             ),
@@ -405,7 +411,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         final key = item['key'] as String;
         final selected = platforms.contains(key);
         return SizedBox(
-          width: width, height: 54,
+          width: width, height: 62,
           child: InkWell(
             onTap: () => setState(() {
               if (!selected) {
@@ -435,7 +441,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                 Text(item['name'] as String,
                   style: GoogleFonts.inter(
                     color: selected ? Colors.white : Colors.white70,
-                    fontSize: 9.3, fontWeight: FontWeight.w900)),
+                    fontSize: 10, fontWeight: FontWeight.w900)),
                 if (selected) ...[
                   const SizedBox(width: 5),
                   Icon(LucideIcons.check, color: pink, size: 13),
@@ -449,7 +455,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   });
 
   Widget _colorRow() => SizedBox(
-    height: 58,
+    height: 72,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -479,7 +485,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   }
 
   Widget _iconRow() => SizedBox(
-    height: 62,
+    height: 72,
     child: ListView.separated(
       scrollDirection: Axis.horizontal,
       physics: const BouncingScrollPhysics(),
@@ -503,7 +509,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
           borderRadius: BorderRadius.circular(16),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 140),
-            width: 62, height: 62,
+            width: 68, height: 68,
             decoration: BoxDecoration(
               color: selected ? pink.withValues(alpha: .075) : panel,
               borderRadius: BorderRadius.circular(16),
@@ -548,7 +554,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
   );
 
   Widget _createButton() => SizedBox(
-    width: double.infinity, height: 60,
+    width: double.infinity, height: 68,
     child: ElevatedButton(
       onPressed: busy ? null : save,
       style: ElevatedButton.styleFrom(
@@ -556,7 +562,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
         foregroundColor: Colors.white,
         shadowColor: Colors.transparent,
         padding: EdgeInsets.zero,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(19)),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
       child: Ink(
         decoration: BoxDecoration(
@@ -571,7 +577,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                 const Icon(LucideIcons.sparkles, size: 21),
                 const SizedBox(width: 10),
                 Text(widget.project == null ? 'Create Project' : 'Save Changes',
-                  style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w900)),
+                  style: GoogleFonts.inter(fontSize: 18, fontWeight: FontWeight.w900)),
                 const SizedBox(width: 9),
                 const Icon(LucideIcons.arrow_right, size: 21),
               ]),
@@ -579,4 +585,41 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
       ),
     ),
   );
+}
+
+
+class _WizardBackdropPainter extends CustomPainter {
+  const _WizardBackdropPainter();
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width * .80, size.height * .10);
+    final glow = Paint()
+      ..shader = const RadialGradient(
+        colors: [Color(0x553B00FF), Color(0x001A0038)],
+      ).createShader(Rect.fromCircle(center: center, radius: size.width * .42));
+    canvas.drawCircle(center, size.width * .42, glow);
+    final horizon = size.height * .91;
+    final planet = Paint()
+      ..shader = const RadialGradient(
+        center: Alignment.topCenter,
+        radius: 1.0,
+        colors: [Color(0xAA3210FF), Color(0x003000FF)],
+      ).createShader(Rect.fromCircle(
+        center: Offset(size.width * .50, horizon),
+        radius: size.width * .72,
+      ));
+    canvas.drawCircle(Offset(size.width * .50, horizon), size.width * .72, planet);
+    final ring = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.4
+      ..shader = const LinearGradient(
+        colors: [Color(0x00FF00FF), Color(0xCCFF19E8), Color(0xFF00D9FF)],
+      ).createShader(Rect.fromLTWH(0, horizon - 65, size.width, 130));
+    canvas.drawArc(
+      Rect.fromCenter(center: Offset(size.width * .50, horizon), width: size.width * 1.45, height: size.width * .55),
+      math.pi * 1.03, math.pi * .94, false, ring,
+    );
+  }
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

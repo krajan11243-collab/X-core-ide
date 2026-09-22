@@ -81,14 +81,14 @@ class _HomePageState extends ConsumerState<HomePage> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          width: 54, height: 54,
+          width: 48, height: 48,
           decoration: BoxDecoration(
             color: text.withValues(alpha: .025),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(14),
             border: Border.all(color: accent.withValues(alpha: .35)),
             boxShadow: [BoxShadow(color: accent.withValues(alpha: .08), blurRadius: 18)],
           ),
-          child: Icon(icon, color: text, size: 24),
+          child: Icon(icon, color: text, size: 21),
         ),
       ),
     );
@@ -335,10 +335,9 @@ class _HomePageState extends ConsumerState<HomePage> {
               Row(children: [iconButton(LucideIcons.terminal, cyan, () => context.push('/terminal')), const SizedBox(width: 8), iconButton(LucideIcons.settings, cyan, () => context.push('/settings'))]),
             ]),
           )),
-          SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 22, 20, 0), child: lastProject == null ? Container(height: 120, decoration: BoxDecoration(borderRadius: BorderRadius.circular(22), border: Border.all(color: purple.withValues(alpha: .3))), child: Center(child: Text('Create your first X-core project', style: GoogleFonts.inter(color: muted, fontWeight: FontWeight.w600)))) : resumeCard(lastProject))),
           SliverToBoxAdapter(child: Padding(padding: const EdgeInsets.fromLTRB(20, 24, 20, 10), child: Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [Text('Projects (' + projects.length.toString() + ')', style: GoogleFonts.inter(fontSize: 17, fontWeight: FontWeight.w800, color: text)), Icon(LucideIcons.list_filter, size: 18, color: muted)]))),
           if (projects.isEmpty)
-            SliverFillRemaining(hasScrollBody: false, child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 100), child: ElevatedButton.icon(onPressed: () => _showProjectDialog(context, ref), icon: const Icon(LucideIcons.plus), label: const Text('Create Project'), style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary, foregroundColor: theme.colorScheme.onPrimary, padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)))))))
+            SliverFillRemaining(hasScrollBody: false, child: Center(child: Padding(padding: const EdgeInsets.only(bottom: 100), child: _xcoreCreateButton(context, () => _showProjectDialog(context, ref)))))
           else
             SliverPadding(padding: const EdgeInsets.fromLTRB(20, 0, 20, 110), sliver: SliverList(delegate: SliverChildBuilderDelegate((ctx, i) => projectCard(projects[i]), childCount: projects.length))),
         ])),

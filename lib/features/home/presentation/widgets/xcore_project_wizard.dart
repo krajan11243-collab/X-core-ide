@@ -159,7 +159,7 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
                     const SizedBox(height: 20),
                     _section(theme, 'PACKAGE NAME (APPLICATION ID)', 'Android package'),
                     const SizedBox(height: 10),
-                    _field(theme, 'Package Name', 'com.example.myapp', sdkCtrl, LucideIcons.code_2),
+                    _field(theme, 'Package Name', 'com.example.myapp', sdkCtrl, LucideIcons.code),
                   ],
                   const SizedBox(height: 20),
                   _section(theme, 'ACCENT COLOR', 'Choose theme color'),

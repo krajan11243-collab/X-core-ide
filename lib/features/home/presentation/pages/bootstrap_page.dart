@@ -154,7 +154,7 @@ class _XCoreLogoPainter extends CustomPainter {
       canvas.drawLine(Offset(c.dx+dx*s,c.dy-38*s),Offset(c.dx+dx*s,c.dy+38*s),slider);
       canvas.drawRect(Rect.fromCenter(center:Offset(c.dx+dx*s,c.dy+5*s),width:20*s,height:31*s),Paint()..color=const Color(0xFFFF7186));
     }
-    canvas.drawRect(Rect.fromLTWH(c.dx-54*s,c.dy-2*s,108*s,7*s),Paint()..color=bg);
+    canvas.drawRect(Rect.fromLTWH(c.dx-54*s,c.dy-2*s,108*s,7*s),Paint()..color=const Color(0xFF020205));
   }
   @override bool shouldRepaint(covariant CustomPainter oldDelegate)=>false;
 }

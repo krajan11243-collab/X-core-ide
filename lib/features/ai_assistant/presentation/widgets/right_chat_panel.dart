@@ -1218,31 +1218,39 @@ class _RightChatPanelState extends ConsumerState<RightChatPanel> {
                     ),
                     const SizedBox(width: 4),
                     // Send Button
-                    Container(
-                      width: 32,
-                      height: 32,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [Color(0xFFFF18D7), Color(0xFF9B35FF), Color(0xFF28B8FF)],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        shape: BoxShape.circle,
-                        border: Border.all(color: Colors.white.withValues(alpha: .22), width: 1),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0xFF9B35FF),
-                            blurRadius: 14,
-                            spreadRadius: -5,
+                    SizedBox(
+                      width: 40,
+                      height: 40,
+                      child: Material(
+                        color: Colors.transparent,
+                        shape: const CircleBorder(),
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [Color(0xFFFF18D7), Color(0xFF9B35FF), Color(0xFF28B8FF)],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white.withValues(alpha: .22), width: 1),
+                            boxShadow: const [
+                              BoxShadow(
+                                color: Color(0xFF9B35FF),
+                                blurRadius: 14,
+                                spreadRadius: -5,
+                              ),
+                            ],
                           ),
-                        ],
-                      ),
-                      child: IconButton(
-                        icon: const Icon(LucideIcons.send, color: Colors.white, size: 14),
-                        padding: EdgeInsets.zero,
-                        constraints: const BoxConstraints(),
-                        tooltip: 'Send message',
-                        onPressed: () => _sendMessage(context, ref),
+                          child: InkWell(
+                            onTap: () => _sendMessage(context, ref),
+                            customBorder: const CircleBorder(),
+                            splashColor: Colors.white.withValues(alpha: .18),
+                            highlightColor: Colors.white.withValues(alpha: .08),
+                            child: const Center(
+                              child: Icon(LucideIcons.send, color: Colors.white, size: 16),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ],

@@ -2441,3 +2441,5 @@ $history
 final aiProvider = StateNotifierProvider<AINotifier, AIState>((ref) {
   return AINotifier(ref);
 });
+
+// Token accounting is intentionally not used as a chat send limit.

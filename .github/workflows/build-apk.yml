@@ -60,7 +60,13 @@ jobs:
       - name: Enable Gradle cache
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Restore signing key
+      - name: Restore persistent signing key
+        uses: actions/cache@v4
+        with:
+          path: android/app/xcore-release.keystore
+          key: xcore-release-keystore-v1
+
+      - name: Prepare persistent signing key
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -69,12 +75,20 @@ jobs:
         run: |
           set -e
           if [ -n "$KEYSTORE_BASE64" ]; then
-            echo "$KEYSTORE_BASE64" | base64 -d > android/app/release.keystore
-            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=release.keystore\n' \
-              "$KEYSTORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
+            echo "$KEYSTORE_BASE64" | base64 -d > android/app/xcore-release.keystore
+            printf 'storePassword=%s\nkeyPassword=%s\nkeyAlias=%s\nstoreFile=xcore-release.keystore\n' "$KEYSTORE_PASSWORD" "$KEY_PASSWORD" "$KEY_ALIAS" > android/key.properties
+            echo "Using configured repository signing key."
+          elif [ ! -s android/app/xcore-release.keystore ]; then
+            keytool -genkeypair -v \
+              -keystore android/app/xcore-release.keystore \
+              -storepass XcoreIDE2026 -keypass XcoreIDE2026 \
+              -alias xcore -keyalg RSA -keysize 2048 -validity 10000 \
+              -dname 'CN=X-core IDE, OU=X-core, O=X-core IDE, L=India, ST=Tamil Nadu, C=IN'
+            echo "Generated persistent X-core signing key; Actions cache will reuse it."
           else
-            echo "WARNING: no KEYSTORE_BASE64 secret — APK will be signed with the debug key."
+            echo "Restored persistent X-core signing key from Actions cache."
           fi
+          printf 'storePassword=XcoreIDE2026\nkeyPassword=XcoreIDE2026\nkeyAlias=xcore\nstoreFile=xcore-release.keystore\n' > android/key.properties
 
       - name: Print tool versions
         run: |

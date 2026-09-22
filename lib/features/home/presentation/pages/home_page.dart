@@ -356,21 +356,30 @@ class _HomePageState extends ConsumerState<HomePage> {
     );
   }
   Widget _xcoreCreateButton(BuildContext context, VoidCallback onTap) {
+    const pink = Color(0xFFFF16D8);
+    const purple = Color(0xFF9B35FF);
+    const blue = Color(0xFF405CFF);
+
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(18),
-        child: Container(
+        child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFE38A8F),
+            gradient: const LinearGradient(
+              colors: [pink, purple, blue],
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+            ),
             borderRadius: BorderRadius.circular(18),
             boxShadow: [
               BoxShadow(
-                color: const Color(0xFFE38A8F).withValues(alpha: .22),
-                blurRadius: 18,
-                offset: const Offset(0, 7),
+                color: pink.withValues(alpha: .20),
+                blurRadius: 22,
+                spreadRadius: -2,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
@@ -379,7 +388,14 @@ class _HomePageState extends ConsumerState<HomePage> {
             children: [
               const Icon(LucideIcons.plus, color: Colors.white, size: 22),
               const SizedBox(width: 10),
-              Text('Create Project', style: GoogleFonts.inter(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 16)),
+              Text(
+                'Create Project',
+                style: GoogleFonts.inter(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 16,
+                ),
+              ),
             ],
           ),
         ),

@@ -391,29 +391,45 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
               ),
               child: Stack(
                 children: [
-                  Row(
-                    children: [
-                      XCoreTechIcon(
-                        logo: item['logo'] as XCoreTechLogo,
-                        color: selected ? color : Colors.white70,
-                        size: 18 * s,
-                      ),
-                      SizedBox(width: 5 * s),
-                      Expanded(
-                        child: Text(
-                          item['name'] as String,
-                          maxLines: 1,
-                          softWrap: false,
-                          overflow: TextOverflow.ellipsis,
-                          style: GoogleFonts.inter(
-                            color: selected ? Colors.white : Colors.white70,
-                            fontSize: 7.2 * s,
-                            fontWeight: FontWeight.w900,
-                            letterSpacing: -.05,
+                  Center(
+                    child: Transform.translate(
+                      offset: Offset(0, 1.5 * s),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          SizedBox(
+                            width: 20 * s,
+                            height: 20 * s,
+                            child: Center(
+                              child: XCoreTechIcon(
+                                logo: item['logo'] as XCoreTechLogo,
+                                color: selected ? color : Colors.white70,
+                                size: 19 * s,
+                              ),
+                            ),
                           ),
-                        ),
+                          SizedBox(width: 5 * s),
+                          ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: width - 33 * s),
+                            child: Text(
+                              item['name'] as String,
+                              maxLines: 1,
+                              softWrap: false,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: GoogleFonts.inter(
+                                color: selected ? Colors.white : Colors.white70,
+                                fontSize: 7.2 * s,
+                                fontWeight: FontWeight.w900,
+                                letterSpacing: -.05,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
-                    ],
+                    ),
                   ),
                   if (selected)
                     Positioned(
@@ -581,20 +597,20 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     );
   });
 
-  Widget _colorRow(double s) => LayoutBuilder(builder: (context, constraints) {
-    final gap = 6 * s;
-    final width = (constraints.maxWidth - gap * 5) / 6;
-    final shown = colors.take(5).toList();
-    return Row(
-      children: [
-        _colorChoice(null, width, s),
-        ...shown.map((c) => Padding(
-          padding: EdgeInsets.only(left: gap),
-          child: _colorChoice(c, width, s),
-        )),
-      ],
-    );
-  });
+  Widget _colorRow(double s) => SizedBox(
+    height: 44 * s,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 1 * s),
+      itemCount: colors.length + 1,
+      separatorBuilder: (_, __) => SizedBox(width: 6 * s),
+      itemBuilder: (context, index) {
+        final Color? c = index == 0 ? null : colors[index - 1];
+        return _colorChoice(c, 40 * s, s);
+      },
+    ),
+  );
 
   Widget _colorChoice(Color? c, double width, double s) {
     final selected = c == null ? colorValue == null : colorValue == c.toARGB32();
@@ -639,20 +655,20 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
     );
   }
 
-  Widget _iconRow(double s) => LayoutBuilder(builder: (context, constraints) {
-    final gap = 6 * s;
-    final width = (constraints.maxWidth - gap * 5) / 6;
-    final shown = icons.take(5).toList();
-    return Row(
-      children: [
-        _iconChoice(null, width, s),
-        ...shown.map((icon) => Padding(
-          padding: EdgeInsets.only(left: gap),
-          child: _iconChoice(icon, width, s),
-        )),
-      ],
-    );
-  });
+  Widget _iconRow(double s) => SizedBox(
+    height: 44 * s,
+    child: ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 1 * s),
+      itemCount: icons.length + 1,
+      separatorBuilder: (_, __) => SizedBox(width: 6 * s),
+      itemBuilder: (context, index) {
+        final IconData? icon = index == 0 ? null : icons[index - 1];
+        return _iconChoice(icon, 40 * s, s);
+      },
+    ),
+  );
 
   Widget _iconChoice(IconData? icon, double width, double s) {
     final selected = icon == null ? iconCodePoint == null : iconCodePoint == icon.codePoint;
@@ -687,7 +703,14 @@ class _XCoreProjectWizardState extends ConsumerState<XCoreProjectWizard> {
           child: Stack(
             alignment: Alignment.center,
             children: [
-              Icon(icon ?? LucideIcons.ban, color: selected ? pink : Colors.white70, size: 17 * s),
+              Transform.translate(
+                offset: Offset(0, 1.5 * s),
+                child: Icon(
+                  icon ?? LucideIcons.ban,
+                  color: selected ? pink : Colors.white70,
+                  size: 18 * s,
+                ),
+              ),
               if (selected)
                 Positioned(
                   right: 3 * s,

@@ -195,7 +195,6 @@ class InferenceEngine {
 
     _isLiteRt = true;
     _controller = null;
-    _liteRtContextSize = contextSize;
 
     final tempDir = await getTemporaryDirectory();
     final cacheDir = Directory('${tempDir.path}/litert_cache');

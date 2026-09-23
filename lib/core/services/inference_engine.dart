@@ -41,6 +41,7 @@ class InferenceEngine {
   String? _liteConversationSystemPrompt;
   double? _liteConversationTemperature;
   bool _liteConversationHasMessages = false;
+  int _liteRtContextSize = 1024;
 
   Future<LoadResult> loadModel({
     required String modelPath,
@@ -195,12 +196,15 @@ class InferenceEngine {
 
     _isLiteRt = true;
     _controller = null;
+    _liteRtContextSize = contextSize;
 
     final tempDir = await getTemporaryDirectory();
     final cacheDir = Directory('${tempDir.path}/litert_cache');
-    final backend = forceCpu || performanceMode == 'cpu_safe'
-        ? LiteLmBackend.cpu
-        : LiteLmBackend.gpu;
+    // Keep the existing settings values, but make the default mobile path
+    // CPU-safe. LiteRT GPU backend failures can be native process crashes on
+    // vendor-specific Android drivers. GPU is opt-in via gpu_fast.
+    final useGpu = !forceCpu && performanceMode == 'gpu_fast';
+    final backend = useGpu ? LiteLmBackend.gpu : LiteLmBackend.cpu;
     final backendLabel = backend == LiteLmBackend.gpu ? 'GPU' : 'CPU';
 
     try {
@@ -666,10 +670,20 @@ class InferenceEngine {
   }) async {
     final hasIncomingHistory = conversationHistory != null &&
         conversationHistory.any((msg) => (msg['content'] ?? '').isNotEmpty);
+    final historyChars = conversationHistory == null
+        ? 0
+        : conversationHistory.fold<int>(
+            0, (sum, msg) => sum + (msg['content'] ?? '').length);
+    // Rebuild the conversation before it grows too large. LiteRT owns the
+    // native KV cache; letting a long-lived session grow without a hard
+    // boundary is a common source of OOM/hangs on phones.
     final shouldReset = _liteConversation == null ||
         _liteConversationSystemPrompt != systemPrompt ||
         _liteConversationTemperature != temperature ||
-        (_liteConversationHasMessages && !hasIncomingHistory);
+        (_liteConversationHasMessages && !hasIncomingHistory) ||
+        (_liteConversationHasMessages &&
+            (conversationHistory?.length ?? 0) > 6) ||
+        (_liteConversationHasMessages && historyChars > 3200);
 
     if (!shouldReset) return;
 
@@ -677,12 +691,23 @@ class InferenceEngine {
       await _liteConversation?.dispose();
     } catch (_) {}
 
-    // Calculate how much history we can fit.
-    // Keep last 8 messages to implement a 'sliding window' —
-    // this prevents KV cache overflow that causes garbage output (1111...)
-    final safeHistory = conversationHistory != null && conversationHistory.length > 8
-        ? conversationHistory.sublist(conversationHistory.length - 8)
-        : conversationHistory;
+    // Keep only a small recent window. Each message is also capped so the
+    // initial prompt cannot consume the whole mobile context before the user
+    // gets an answer.
+    final sourceHistory = conversationHistory ?? const <Map<String, String>>[];
+    final recentHistory = sourceHistory.length > 4
+        ? sourceHistory.sublist(sourceHistory.length - 4)
+        : sourceHistory;
+    final safeHistory = recentHistory.map((msg) {
+      final content = msg['content'] ?? '';
+      const limit = 850;
+      return <String, String>{
+        'role': msg['role'] ?? 'user',
+        'content': content.length > limit
+            ? content.substring(0, limit) + '\n[older content trimmed]',
+            : content,
+      };
+    }).toList();
 
     _liteConversation = await _liteEngine!.createConversation(
       LiteLmConversationConfig(
@@ -792,8 +817,8 @@ class InferenceEngine {
   ) {
     if (history == null || history.isEmpty) return const [];
 
-    var recent = history.length > 16
-        ? history.sublist(history.length - 16)
+    var recent = history.length > 4
+        ? history.sublist(history.length - 4)
         : List<Map<String, String>>.from(history);
     if (recent.isNotEmpty &&
         recent.last['role'] == 'user' &&
@@ -804,7 +829,11 @@ class InferenceEngine {
     return recent
         .where((msg) => (msg['content'] ?? '').trim().isNotEmpty)
         .map((msg) {
-      final content = msg['content'] ?? '';
+      final rawContent = msg['content'] ?? '';
+      const limit = 850;
+      final content = rawContent.length > limit
+          ? rawContent.substring(0, limit) + '\n[older content trimmed]'
+          : rawContent;
       return msg['role'] == 'assistant'
           ? LiteLmMessage.model(content)
           : LiteLmMessage.user(content);

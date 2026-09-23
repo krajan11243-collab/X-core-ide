@@ -41,7 +41,6 @@ class InferenceEngine {
   String? _liteConversationSystemPrompt;
   double? _liteConversationTemperature;
   bool _liteConversationHasMessages = false;
-  int _liteRtContextSize = 1024;
 
   Future<LoadResult> loadModel({
     required String modelPath,
@@ -704,7 +703,7 @@ class InferenceEngine {
       return <String, String>{
         'role': msg['role'] ?? 'user',
         'content': content.length > limit
-            ? content.substring(0, limit) + '\n[older content trimmed]',
+            ? content.substring(0, limit) + '\n[older content trimmed]'
             : content,
       };
     }).toList();

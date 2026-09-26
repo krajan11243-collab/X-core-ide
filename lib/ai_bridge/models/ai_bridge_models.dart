@@ -39,7 +39,7 @@ class AiBridgeSettings {
   factory AiBridgeSettings.fromJson(Map<String,dynamic> j){
     final raw=(j['permissions'] as List?)?.cast<String>()??[];
     final set=raw.map((x){for(final p in AiBridgePermission.values){if(p.name==x)return p;}return null;}).whereType<AiBridgePermission>().toSet();
-    return AiBridgeSettings(enabled:j['enabled']==true,lanMode:j['lanMode']==true,apiKey:j['apiKey'] as String???'',port:(j['port'] as num?)?.toInt()??8765,permissions:set.isEmpty?const {AiBridgePermission.readFiles,AiBridgePermission.writeFiles,AiBridgePermission.createFiles,AiBridgePermission.projectManagement,AiBridgePermission.build}:set);
+    return AiBridgeSettings(enabled:j['enabled']==true,lanMode:j['lanMode']==true,apiKey:j['apiKey'] as String? ?? '',port:(j['port'] as num?)?.toInt()??8765,permissions:set.isEmpty?const {AiBridgePermission.readFiles,AiBridgePermission.writeFiles,AiBridgePermission.createFiles,AiBridgePermission.projectManagement,AiBridgePermission.build}:set);
   }
   String encode()=>jsonEncode(toJson());
 }

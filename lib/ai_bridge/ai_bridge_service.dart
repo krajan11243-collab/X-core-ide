@@ -10,7 +10,9 @@ import 'package:path/path.dart' as p;
 
 import 'package:quantum_ide/ai_bridge/models/ai_bridge_models.dart';
 import 'package:quantum_ide/core/services/project_service.dart';
+import 'package:quantum_ide/core/services/runtime_service.dart';
 import 'package:quantum_ide/core/services/workspace_service.dart';
+import 'package:quantum_ide/core/utils/path_mapper.dart';
 
 /// X-Core's local/ LAN AI control gateway.
 ///
@@ -972,16 +974,37 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     String cwd,
     String command,
   ) async {
-    final shell = Platform.isWindows ? 'cmd.exe' : '/bin/sh';
-    final args = Platform.isWindows
-        ? ['/c', command]
-        : ['-lc', command];
-
     try {
+      final runtime = _ref.read(runtimeServiceProvider);
+      final guestCwd = PathMapper.mapToGuest(cwd, runtime.appDirectory);
+
+      final String shell;
+      final List<String> args;
+      final String workingDirectory;
+      if (Platform.isAndroid) {
+        shell = '/system/bin/sh';
+        args = [
+          runtime.prootCommand,
+          runtime.appDirectory,
+          guestCwd,
+          command,
+        ];
+        workingDirectory = runtime.appDirectory;
+      } else if (Platform.isWindows) {
+        shell = 'cmd.exe';
+        args = ['/c', command];
+        workingDirectory = cwd;
+      } else {
+        shell = Platform.environment['SHELL'] ?? '/bin/sh';
+        args = ['-lc', command];
+        workingDirectory = cwd;
+      }
+
       final result = await Process.run(
         shell,
         args,
-        workingDirectory: cwd,
+        workingDirectory: workingDirectory,
+        environment: Platform.isAndroid ? runtime.env : null,
         runInShell: false,
       );
       return _CommandResult(

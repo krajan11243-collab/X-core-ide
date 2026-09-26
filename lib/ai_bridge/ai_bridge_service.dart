@@ -47,7 +47,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
           await _secure.read(key: 'xcore_ai_bridge_permissions');
       if (raw != null) {
         try {
-          permissions = AiBridgePermission.decodeSet(jsonDecode(raw));
+          permissions = AiBridgePermissionSetCodec.decodeSet(jsonDecode(raw));
         } catch (_) {}
       }
 
@@ -798,7 +798,11 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
       if (entity == FileSystemEntityType.notFound) {
         return {'success': false, 'error': 'Path not found'};
       }
-      await FileSystemEntity.delete(target, recursive: true);
+      if (entity == FileSystemEntityType.directory) {
+        await Directory(target).delete(recursive: true);
+      } else {
+        await File(target).delete();
+      }
       return {'success': true, 'path': target};
     }
 
@@ -810,7 +814,12 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
           !await FileSystemEntity.isDirectory(source)) {
         return {'success': false, 'error': 'Source not found'};
       }
-      await FileSystemEntity.rename(source, target);
+      final sourceType = await FileSystemEntity.type(source);
+      if (sourceType == FileSystemEntityType.directory) {
+        await Directory(source).rename(target);
+      } else {
+        await File(source).rename(target);
+      }
       return {'success': true, 'path': target};
     }
 

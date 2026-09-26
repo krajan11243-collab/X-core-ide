@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import 'package:quantum_ide/core/providers/locale_provider.dart';
 import 'package:quantum_ide/core/services/settings_service.dart';
 import 'package:quantum_ide/features/home/presentation/pages/ai_settings_page.dart';
+import 'package:quantum_ide/features/home/presentation/pages/ai_bridge_page.dart';
 import 'package:quantum_ide/l10n/app_localizations.dart';
 
 class SettingsPage extends ConsumerWidget {
@@ -141,6 +142,13 @@ class SettingsPage extends ConsumerWidget {
                       title: AppLocalizations.of(context)!.aiProviders,
                       subtitle: AppLocalizations.of(context)!.aiProvidersSubtitle,
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiSettingsPage())),
+                    ),
+                    _tile(
+                      context,
+                      icon: LucideIcons.plugZap,
+                      title: 'AI Bridge',
+                      subtitle: 'Universal API, MCP and project control',
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiBridgePage())),
                     ),
                     _tile(context, icon: LucideIcons.package, title: AppLocalizations.of(context)!.ubuntuPackages, subtitle: AppLocalizations.of(context)!.manageCliTools,
                       onTap: () => context.push('/packages')),

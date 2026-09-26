@@ -150,7 +150,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
   Future<void> setFullAccess(bool enabled) async {
     final next = enabled
         ? AiBridgePermission.values.toSet()
-        : AiBridgePermission.defaults;
+        : AiBridgePermissionSetCodec.defaults;
     state = state.copyWith(permissions: next);
     await _secure.write(
       key: 'xcore_ai_bridge_permissions',

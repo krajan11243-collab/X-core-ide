@@ -28,6 +28,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
   final Ref _ref;
   final FlutterSecureStorage _secure = const FlutterSecureStorage();
   HttpServer? _server;
+  final Map<String, DateTime> _mcpSessions = <String, DateTime>{};
 
   Future<void> _load() async {
     try {
@@ -274,11 +275,11 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     req.response.headers.set('Access-Control-Allow-Origin', '*');
     req.response.headers.set(
       'Access-Control-Allow-Headers',
-      'Content-Type, Authorization',
+      'Content-Type, Authorization, MCP-Protocol-Version, Mcp-Session-Id',
     );
     req.response.headers.set(
       'Access-Control-Allow-Methods',
-      'GET, POST, OPTIONS',
+      'GET, POST, DELETE, OPTIONS',
     );
 
     if (req.method == 'OPTIONS') {
@@ -295,6 +296,20 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
           'version': '1.1.0',
           'enabled': state.enabled,
           'lan_mode': state.lanMode,
+        });
+        return;
+      }
+
+      if (req.uri.path == '/.well-known/xcore-bridge.json' || req.uri.path == '/v1/discovery') {
+        await _write(req, {
+          'name': 'X-Core AI Bridge', 'version': '2.0.0',
+          'transport': 'streamable-http', 'mcp_endpoint': mcpEndpoint,
+          'api_endpoint': endpoint, 'auth': {'type': 'bearer'},
+          'capabilities': {'tools': true, 'sessions': true, 'project_control': true,
+            'file_control': true, 'terminal': state.permissions.contains(AiBridgePermission.terminal),
+            'build': state.permissions.contains(AiBridgePermission.build),
+            'git': state.permissions.contains(AiBridgePermission.git)},
+          'tools_endpoint': '$endpoint/tools',
         });
         return;
       }
@@ -561,6 +576,45 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
   ) async {
     final id = input['id'];
     final method = input['method'];
+    final protocol = req.headers.value('MCP-Protocol-Version');
+    final sessionId = req.headers.value('Mcp-Session-Id');
+
+    if (method == 'server/discover') {
+      await _write(req, {
+        'jsonrpc': '2.0', 'id': id,
+        'result': {
+          'protocolVersions': ['2026-07-28', '2025-11-25', '2025-06-18'],
+          'serverInfo': {'name': 'X-Core AI Bridge', 'version': '2.0.0'},
+          'capabilities': {'tools': {}, 'logging': {}},
+          'instructions': 'X-Core project control bridge. Tools are permission-gated.',
+        },
+      }, headers: {'MCP-Protocol-Version': '2026-07-28'});
+      return;
+    }
+
+    if (method == 'initialize') {
+      final newSession = _newSessionId();
+      _mcpSessions[newSession] = DateTime.now();
+      await _write(req, {
+        'jsonrpc': '2.0', 'id': id,
+        'result': {
+          'protocolVersion': '2025-11-25',
+          'capabilities': {'tools': {}, 'logging': {}},
+          'serverInfo': {'name': 'X-Core AI Bridge', 'version': '2.0.0'},
+          'instructions': 'X-Core project control bridge. Tools are permission-gated.',
+        },
+      }, headers: {'MCP-Protocol-Version': '2025-11-25', 'Mcp-Session-Id': newSession});
+      return;
+    }
+
+    if (sessionId != null && sessionId.isNotEmpty) {
+      if (!_mcpSessions.containsKey(sessionId)) {
+        await _write(req, {'jsonrpc': '2.0', 'id': id,
+          'error': {'code': -32001, 'message': 'Invalid or expired MCP session'}}, status: 404);
+        return;
+      }
+      _mcpSessions[sessionId] = DateTime.now();
+    }
 
     if (method == 'notifications/initialized') {
       await _write(req, {
@@ -610,9 +664,10 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     }
 
     await _write(req, {
-      'jsonrpc': '2.0',
-      'id': id,
-      'result': result,
+      'jsonrpc': '2.0', 'id': id, 'result': result,
+    }, headers: {
+      if (protocol != null) 'MCP-Protocol-Version': protocol,
+      if (sessionId != null) 'Mcp-Session-Id': sessionId,
     });
   }
 
@@ -1107,12 +1162,19 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     return value.trim();
   }
 
+  String _newSessionId() {
+    final r = Random.secure();
+    return 'xcs_' + List.generate(32, (_) => r.nextInt(36).toRadixString(36)).join();
+  }
+
   Future<void> _write(
     HttpRequest req,
     Map<String, dynamic> value, {
     int status = 200,
+    Map<String, String>? headers,
   }) async {
     req.response.statusCode = status;
+    headers?.forEach(req.response.headers.set);
     req.response.write(jsonEncode(value));
     await req.response.close();
   }

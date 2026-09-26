@@ -180,7 +180,6 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
   final Dio _dio = Dio();
   final Map<String, CancelToken> _cancelTokens = {};
   final InferenceEngine _engine = InferenceEngine();
-  bool _generationInProgress = false;
 
   static const List<LocalModelInfo> builtinModels = [
     // Text Models
@@ -725,36 +724,21 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
       // Determine if we should force CPU
       bool forceCpu;
       if (isLiteRt) {
-        // Keep auto_fast stable on phones. Some Android GPU drivers can
-        // take the whole process down during LiteRT inference.
-        // gpu_fast can opt into GPU deliberately; a recorded crash always wins.
-        forceCpu = liteRtMode != 'gpu_fast' || gpuCrashDetected;
+        forceCpu = liteRtMode == 'cpu_safe' ||
+            (liteRtMode == 'auto_fast' && gpuCrashDetected);
       } else {
         // For GGUF: force CPU on first-ever load OR if GPU previously crashed
         forceCpu = liteRtMode == 'cpu_safe' || gpuCrashDetected || forceFirstTimeCpu;
       }
 
       // ── Safe contextSize for mobile ──
-      // LiteRT allocates its KV/cache budget from maxNumTokens. A 1–2 GB
-      // mobile model can still OOM when a large context is created, so use a
-      // conservative RAM-aware cap. The UI setting remains intact; the
-      // runtime simply refuses an unsafe cache size on a phone.
+      // On first-ever load cap at 2048 to avoid OOM on unknown hardware.
+      // Once model has loaded at least once, trust the user's settings fully.
       final int userContextSize = settings.contextSize.clamp(512, 8192);
-      final int liteRtSafeCap = state.deviceRamMb <= 0
-          ? 1024
-          : state.deviceRamMb <= 4096
-              ? 768
-              : state.deviceRamMb <= 6144
-                  ? 1024
-                  : state.deviceRamMb <= 8192
-                      ? 1280
-                      : 1536;
-      final int safeContextSize = isLiteRt
-          ? userContextSize.clamp(512, liteRtSafeCap)
-          : (hasEverLoadedSuccessfully
-              ? userContextSize
-              : userContextSize.clamp(512, 2048));
-      debugPrint('[LocalInference] Safe context=$safeContextSize, LiteRT=$isLiteRt, RAM=' + state.deviceRamMb.toString() + 'MB');
+      final int safeContextSize = hasEverLoadedSuccessfully
+          ? userContextSize
+          : userContextSize.clamp(512, 2048);
+      debugPrint('[LocalInference] contextSize: user=$userContextSize, safe=$safeContextSize, firstTime=${!hasEverLoadedSuccessfully}');
 
       // Detect Google Tensor SoC (Pixel 6/7/8) — known Gemma issues
       bool isTensorSoC = false;
@@ -1030,11 +1014,7 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
     if (state.status != LocalModelStatus.ready || state.loadedModel == null) {
       return 'Error: No model loaded. Please download and load a model first.';
     }
-    if (_generationInProgress) {
-      return 'Error: Local model is already generating. Please wait for the current response to finish.';
-    }
 
-    _generationInProgress = true;
     state = state.copyWith(
       generationSource: 'local',
       tokenCount: 0,
@@ -1046,65 +1026,52 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
     DateTime? firstVisibleTokenAt;
 
     try {
-      final isLiteRt = state.loadedModelRuntime == 'litert' ||
-          state.loadedModel!.filename.toLowerCase().endsWith('.litertlm');
-
-      // Keep local prompts deliberately small. A tiny model can still consume
-      // a large amount of RAM when system prompt + history + KV cache grow.
-      final truncatedHistory = _truncateHistory(
-        history,
-        maxChars: isLiteRt ? 3600 : 6500,
-      );
-
-      String sysPrompt =
-          systemInstruction ?? 'You are a helpful coding assistant.';
-      final systemLimit = isLiteRt ? 2600 : 6000;
-      if (sysPrompt.length > systemLimit) {
-        final head = (systemLimit * 0.55).floor();
-        final tail = systemLimit - head;
-        sysPrompt =
-            sysPrompt.substring(0, head) +
-            '\n\n[...local context trimmed for mobile safety...]\n\n' +
-            sysPrompt.substring(sysPrompt.length - tail);
+      // Truncate history to avoid exceeding token limits
+      final truncatedHistory = _truncateHistory(history, maxChars: 8000);
+      
+      // Truncate system prompt if too long for local model.
+      // 8000 chars keeps project file listing + key instructions intact.
+      String sysPrompt = systemInstruction ?? 'You are a helpful coding assistant.';
+      if (sysPrompt.length > 8000) {
+        // Smart truncation: always keep the END of the prompt (project context is appended last)
+        // and keep the beginning (identity/mode instructions).
+        // Cut the middle section (tech stack details) if needed.
+        const half = 4000;
+        final start = sysPrompt.substring(0, half);
+        final end = sysPrompt.substring(sysPrompt.length - half);
+        sysPrompt = '$start\n\n[...технические детали сокращены для локальной модели...]\n\n$end';
       }
-
-      // LiteRT is optimized for short mobile turns. Keep the local response
-      // budget conservative so the phone stays responsive.
-      final maxTokens = isLiteRt ? 384 : 768;
-      final safePromptLimit = isLiteRt ? 1800 : 5000;
-      final safePrompt = prompt.length > safePromptLimit
-          ? prompt.substring(0, safePromptLimit) + '\n[message trimmed]'
-          : prompt;
-
+      
       final content = await _engine.generate(
-        prompt: safePrompt,
+        prompt: prompt,
         conversationHistory: truncatedHistory,
         systemPrompt: sysPrompt,
         modelName: state.loadedModel!.name,
-        maxTokens: maxTokens,
+        maxTokens: 2048,
         temperature: 0.7,
         onToken: (token) {
           firstVisibleTokenAt ??= DateTime.now();
           buffer.write(token);
-
+          
+          // Update token count and TPS in real-time
           final tokenCount = buffer.toString().split(' ').length;
           final speedStart = firstVisibleTokenAt ?? startTime;
-          final elapsedSeconds =
-              DateTime.now().difference(speedStart).inMilliseconds / 1000.0;
+          final elapsedSeconds = DateTime.now().difference(speedStart).inMilliseconds / 1000.0;
           final tps = elapsedSeconds > 0 ? tokenCount / elapsedSeconds : 0.0;
-
+          
           state = state.copyWith(
             tokenCount: tokenCount,
             tokensPerSecond: tps,
             streamingText: buffer.toString(),
           );
-
+          
           onToken?.call(token);
         },
       );
 
+      // Refresh context info after generation
       await refreshContextInfo();
-
+      
       state = state.copyWith(
         generationSource: null,
         streamingText: '',
@@ -1118,8 +1085,6 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
         error: 'Generation failed: $e',
       );
       return 'Error: $e';
-    } finally {
-      _generationInProgress = false;
     }
   }
 

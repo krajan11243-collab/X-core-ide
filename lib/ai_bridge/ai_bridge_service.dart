@@ -222,13 +222,13 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
       _require(AiBridgePermission.createFiles);
       final file=File(_safePath(_required(input,'path')));
       if(await file.exists() && input['overwrite']!=true) return {'success':false,'error':'File already exists'};
-      await file.parent.create(recursive:true); await file.writeAsString(input['content'] as String???'');
+      await file.parent.create(recursive:true); await file.writeAsString(input['content'] as String? ?? '');
       return {'success':true,'path':file.path};
     }
     if(path=='/v1/files/write'){
       _require(AiBridgePermission.writeFiles);
       final file=File(_safePath(_required(input,'path')));
-      await file.parent.create(recursive:true); await file.writeAsString(input['content'] as String???'');
+      await file.parent.create(recursive:true); await file.writeAsString(input['content'] as String? ?? '');
       return {'success':true,'path':file.path};
     }
     if(path=='/v1/files/delete'){
@@ -246,7 +246,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     }
     if(path=='/v1/code/search'){
       _require(AiBridgePermission.readFiles);
-      final root=Directory(_safePath(input['path'] as String???_workspacePath()));
+      final root=Directory(_safePath(input['path'] as String? ?? _workspacePath()));
       final query=_required(input,'query').toLowerCase(); final matches=<Map<String,dynamic>>[];
       if(await root.exists()){await for(final e in root.list(recursive:true,followLinks:false)){if(e is File && matches.length<100){try{final c=await e.readAsString();final i=c.toLowerCase().indexOf(query);if(i>=0)matches.add({'path':e.path,'line':'\n'.allMatches(c.substring(0,i)).length+1});}catch(_){}}}}
       return {'success':true,'matches':matches};
@@ -260,7 +260,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
     if(path=='/v1/git/diff') return _git(['diff','--stat'],input);
     if(path=='/v1/terminal/run'){
       _require(AiBridgePermission.terminal);
-      final cwd=_safePath(input['cwd'] as String???_workspacePath());
+      final cwd=_safePath(input['cwd'] as String? ?? _workspacePath());
       final r=await Process.run('/system/bin/sh',['-c',_required(input,'command')],workingDirectory:cwd);
       return {'success':r.exitCode==0,'exit_code':r.exitCode,'stdout':r.stdout.toString(),'stderr':r.stderr.toString()};
     }
@@ -269,7 +269,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
 
   Future<Map<String,dynamic>> _git(List<String> args,Map<String,dynamic> input) async {
     _require(AiBridgePermission.git);
-    final cwd=_safePath(input['cwd'] as String???_workspacePath());
+    final cwd=_safePath(input['cwd'] as String? ?? _workspacePath());
     final r=await Process.run('git',args,workingDirectory:cwd);
     return {'success':r.exitCode==0,'exit_code':r.exitCode,'stdout':r.stdout.toString(),'stderr':r.stderr.toString()};
   }

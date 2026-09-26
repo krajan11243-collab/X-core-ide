@@ -145,7 +145,7 @@ class SettingsPage extends ConsumerWidget {
                     ),
                     _tile(
                       context,
-                      icon: LucideIcons.plugZap,
+                      icon: LucideIcons.link,
                       title: 'AI Bridge',
                       subtitle: 'Universal API, MCP and project control',
                       onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiBridgePage())),

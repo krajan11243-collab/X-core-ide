@@ -9,6 +9,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:quantum_ide/ai_bridge/models/ai_bridge_models.dart';
+import 'package:quantum_ide/models/project_model.dart';
 import 'package:quantum_ide/core/services/project_service.dart';
 import 'package:quantum_ide/core/services/runtime_service.dart';
 import 'package:quantum_ide/core/services/workspace_service.dart';
@@ -41,7 +42,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
           ) ??
           8765;
 
-      var permissions = AiBridgePermission.defaults;
+      var permissions = AiBridgePermissionSetCodec.defaults;
       final raw =
           await _secure.read(key: 'xcore_ai_bridge_permissions');
       if (raw != null) {

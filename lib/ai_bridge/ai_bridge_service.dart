@@ -293,7 +293,7 @@ class AiBridgeService extends StateNotifier<AiBridgeSettings> {
         await _write(req, {
           'success': true,
           'service': 'X-Core AI Bridge',
-          'version': '1.1.0',
+          'version': '2.0.0',
           'enabled': state.enabled,
           'lan_mode': state.lanMode,
         });

@@ -196,6 +196,10 @@ class InferenceEngine {
     _isLiteRt = true;
     _controller = null;
 
+    // Defensive native-memory cap: LiteRT's maxNumTokens is the total
+    // input+output context window, so large values can stall the phone.
+    final safeLiteRtContextSize = contextSize.clamp(1024, 3072);
+
     final tempDir = await getTemporaryDirectory();
     final cacheDir = Directory('${tempDir.path}/litert_cache');
     final backend = forceCpu || performanceMode == 'cpu_safe'
@@ -297,7 +301,7 @@ class InferenceEngine {
         cacheDir: cacheDir,
         visionBackend: enableVision ? LiteLmBackend.cpu : null,
         audioBackend: null,
-        maxNumTokens: contextSize,
+        maxNumTokens: safeLiteRtContextSize,
       ),
     );
   }

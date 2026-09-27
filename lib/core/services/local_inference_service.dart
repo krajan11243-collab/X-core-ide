@@ -732,13 +732,23 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
       }
 
       // ── Safe contextSize for mobile ──
-      // On first-ever load cap at 2048 to avoid OOM on unknown hardware.
-      // Once model has loaded at least once, trust the user's settings fully.
+      // LiteRT keeps the configured token window in native memory. A large
+      // 4096/8192 window can make the whole phone stall even when the model
+      // itself is small. Keep the existing user setting for GGUF, but apply a
+      // conservative mobile cap to LiteRT on every load (not only first load).
       final int userContextSize = settings.contextSize.clamp(512, 8192);
-      final int safeContextSize = hasEverLoadedSuccessfully
-          ? userContextSize
-          : userContextSize.clamp(512, 2048);
-      debugPrint('[LocalInference] contextSize: user=$userContextSize, safe=$safeContextSize, firstTime=${!hasEverLoadedSuccessfully}');
+      final int liteRtContextSize = switch (state.deviceTier) {
+        'low' => 1024,
+        'mid' => 1536,
+        'high' => 2048,
+        _ => 3072,
+      };
+      final int safeContextSize = isLiteRt
+          ? liteRtContextSize
+          : (hasEverLoadedSuccessfully
+              ? userContextSize
+              : userContextSize.clamp(512, 2048));
+      debugPrint('[LocalInference] contextSize: user=$userContextSize, safe=$safeContextSize, liteRt=$isLiteRt, firstTime=${!hasEverLoadedSuccessfully}');
 
       // Detect Google Tensor SoC (Pixel 6/7/8) — known Gemma issues
       bool isTensorSoC = false;
@@ -1032,6 +1042,9 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
       // Truncate system prompt if too long for local model.
       // 8000 chars keeps project file listing + key instructions intact.
       String sysPrompt = systemInstruction ?? 'You are a helpful coding assistant.';
+      // Keep local responses in the user's language. This prevents the
+      // multilingual local model from unexpectedly switching to Russian.
+      sysPrompt = '$sysPrompt\n\nAlways answer in the same language as the user\'s latest message. Do not switch languages unless the user asks. Never use Russian by default.';
       if (sysPrompt.length > 8000) {
         // Smart truncation: always keep the END of the prompt (project context is appended last)
         // and keep the beginning (identity/mode instructions).
@@ -1039,7 +1052,7 @@ class LocalInferenceNotifier extends StateNotifier<LocalInferenceState> {
         const half = 4000;
         final start = sysPrompt.substring(0, half);
         final end = sysPrompt.substring(sysPrompt.length - half);
-        sysPrompt = '$start\n\n[...технические детали сокращены для локальной модели...]\n\n$end';
+        sysPrompt = '$start\n\n[...technical details shortened for local model...]\n\n$end';
       }
       
       final content = await _engine.generate(

@@ -829,7 +829,7 @@ class _EditorPageState extends ConsumerState<EditorPage> {
                           ],
                         ),
                       const Expanded(
-                        child: EditorAppBarTitle(),
+                        child: SizedBox.shrink(),
                       ),
                       Row(
                         mainAxisSize: MainAxisSize.min,
